@@ -40,5 +40,5 @@
 ## **Tech Stack**
 
 * **Frontend:** React  
-* **Backend:** Python  
+* **Backend:** TypeScript (Nestjs)
 * **Database:** MySQL
