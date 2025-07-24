@@ -1,0 +1,482 @@
+### 
+
+# App Controller
+
+
+### 
+
+GET http://localhost:3000/ HTTP/1.1
+
+
+### 
+
+# Products Controller
+
+
+### 
+
+# Create Product
+
+POST http://localhost:3000/products HTTP/1.1
+Content-Type: application/json
+
+{
+  "brand": "TestBrand",
+  "category_id": 1,
+  "description": "A product for testing purposes.",
+  "image_url": "http://example.com/test.jpg",
+  "name": "Test Product",
+  "price": 99.99
+}
+
+
+### 
+
+# Get All Products
+
+GET http://localhost:3000/products HTTP/1.1
+
+
+### 
+
+# Get Product by ID
+
+GET http://localhost:3000/products/1 HTTP/1.1
+
+
+### 
+
+# Update Product
+
+PATCH http://localhost:3000/products/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "price": 109.99
+}
+
+
+### 
+
+# Delete Product
+
+DELETE http://localhost:3000/products/1 HTTP/1.1
+
+
+### 
+
+# Users Controller
+
+
+### 
+
+# Create User
+
+POST http://localhost:3000/users HTTP/1.1
+Content-Type: application/json
+
+{
+  "address": "123 Test St",
+  "email": "test@example.com",
+  "first_name": "Test",
+  "last_name": "User",
+  "password_hash": "hashedpassword123",
+  "phone_number": "123-456-7890",
+  "role": "customer",
+  "username": "testuser"
+}
+
+
+### 
+
+# Get All Users
+
+GET http://localhost:3000/users HTTP/1.1
+
+
+### 
+
+# Get User by ID
+
+GET http://localhost:3000/users/1 HTTP/1.1
+
+
+### 
+
+# Update User
+
+PATCH http://localhost:3000/users/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "newtest@example.com"
+}
+
+
+### 
+
+# Delete User
+
+DELETE http://localhost:3000/users/1 HTTP/1.1
+
+
+### 
+
+# Categories Controller
+
+
+### 
+
+# Create Category
+
+POST http://localhost:3000/categories HTTP/1.1
+Content-Type: application/json
+
+{
+  "description": "Description for new category",
+  "name": "New Category"
+}
+
+
+### 
+
+# Get All Categories
+
+GET http://localhost:3000/categories HTTP/1.1
+
+
+### 
+
+# Get Category by ID
+
+GET http://localhost:3000/categories/1 HTTP/1.1
+
+
+### 
+
+# Update Category
+
+PATCH http://localhost:3000/categories/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "description": "Updated description for category"
+}
+
+
+### 
+
+# Delete Category
+
+DELETE http://localhost:3000/categories/1 HTTP/1.1
+
+
+### 
+
+# Inventory Controller
+
+
+### 
+
+# Create Inventory
+
+POST http://localhost:3000/inventory HTTP/1.1
+Content-Type: application/json
+
+{
+  "product_id": 1,
+  "stock_quantity": 100
+}
+
+
+### 
+
+# Get All Inventory
+
+GET http://localhost:3000/inventory HTTP/1.1
+
+
+### 
+
+# Get Inventory by ID
+
+GET http://localhost:3000/inventory/1 HTTP/1.1
+
+
+### 
+
+# Update Inventory
+
+PATCH http://localhost:3000/inventory/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "stock_quantity": 150
+}
+
+
+### 
+
+# Delete Inventory
+
+DELETE http://localhost:3000/inventory/1 HTTP/1.1
+
+
+### 
+
+# Cart Controller
+
+
+### 
+
+# Create Cart
+
+POST http://localhost:3000/cart HTTP/1.1
+Content-Type: application/json
+
+{
+  "user_id": 1
+}
+
+
+### 
+
+# Get All Carts
+
+GET http://localhost:3000/cart HTTP/1.1
+
+
+### 
+
+# Get Cart by ID
+
+GET http://localhost:3000/cart/1 HTTP/1.1
+
+
+### 
+
+# Update Cart
+
+PATCH http://localhost:3000/cart/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "user_id": 2
+}
+
+
+### 
+
+# Delete Cart
+
+DELETE http://localhost:3000/cart/1 HTTP/1.1
+
+
+### 
+
+# Cart Items Controller
+
+
+### 
+
+# Create Cart Item
+
+POST http://localhost:3000/cart-items HTTP/1.1
+Content-Type: application/json
+
+{
+  "cart_id": 1,
+  "product_id": 1,
+  "quantity": 1
+}
+
+
+### 
+
+# Get All Cart Items
+
+GET http://localhost:3000/cart-items HTTP/1.1
+
+
+### 
+
+# Get Cart Item by ID
+
+GET http://localhost:3000/cart-items/1 HTTP/1.1
+
+
+### 
+
+# Update Cart Item
+
+PATCH http://localhost:3000/cart-items/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "quantity": 2
+}
+
+
+### 
+
+# Delete Cart Item
+
+DELETE http://localhost:3000/cart-items/1 HTTP/1.1
+
+
+### 
+
+# Orders Controller
+
+
+### 
+
+# Create Order
+
+POST http://localhost:3000/orders HTTP/1.1
+Content-Type: application/json
+
+{
+  "shipping_address": "123 Main St, Anytown USA",
+  "user_id": 1
+}
+
+
+### 
+
+# Get All Orders
+
+GET http://localhost:3000/orders HTTP/1.1
+
+
+### 
+
+# Get Order by ID
+
+GET http://localhost:3000/orders/1 HTTP/1.1
+
+
+### 
+
+# Update Order
+
+PATCH http://localhost:3000/orders/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "status": "shipped"
+}
+
+
+### 
+
+# Delete Order
+
+DELETE http://localhost:3000/orders/1 HTTP/1.1
+
+
+### 
+
+# Order Items Controller
+
+
+### 
+
+# Create Order Item
+
+POST http://localhost:3000/order-items HTTP/1.1
+Content-Type: application/json
+
+{
+  "order_id": 1,
+  "price_at_purchase": 99.99,
+  "product_id": 1,
+  "quantity": 2
+}
+
+
+### 
+
+# Get All Order Items
+
+GET http://localhost:3000/order-items HTTP/1.1
+
+
+### 
+
+# Get Order Item by ID
+
+GET http://localhost:3000/order-items/1 HTTP/1.1
+
+
+### 
+
+# Update Order Item
+
+PATCH http://localhost:3000/order-items/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "quantity": 3
+}
+
+
+### 
+
+# Delete Order Item
+
+DELETE http://localhost:3000/order-items/1 HTTP/1.1
+
+
+### 
+
+# Audit Logs Controller
+
+
+### 
+
+# Create Audit Log
+
+POST http://localhost:3000/audit-logs HTTP/1.1
+Content-Type: application/json
+
+{
+  "action_type": "USER_LOGIN",
+  "new_value": "User logged in",
+  "old_value": "",
+  "record_id": 1,
+  "table_name": "users"
+}
+
+
+### 
+
+# Get All Audit Logs
+
+GET http://localhost:3000/audit-logs HTTP/1.1
+
+
+### 
+
+# Get Audit Log by ID
+
+GET http://localhost:3000/audit-logs/1 HTTP/1.1
+
+
+### 
+
+# Update Audit Log
+
+PATCH http://localhost:3000/audit-logs/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "new_value": "User logged out"
+}
+
+
+### 
+
+# Delete Audit Log
+
+DELETE http://localhost:3000/audit-logs/1 HTTP/1.1
