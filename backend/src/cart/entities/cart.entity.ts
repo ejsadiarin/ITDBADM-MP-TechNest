@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToOne,
+  JoinColumn,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { CartItem } from '../../cart-items/entities/cart-item.entity';
 
@@ -16,10 +25,10 @@ export class Cart {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToOne(() => User, user => user.user_id, { onDelete: 'CASCADE' })
+  @OneToOne(() => User, (user) => user.user_id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @OneToMany(() => CartItem, cartItem => cartItem.cart)
+  @OneToMany(() => CartItem, (cartItem) => cartItem.cart)
   cart_items: CartItem[];
 }

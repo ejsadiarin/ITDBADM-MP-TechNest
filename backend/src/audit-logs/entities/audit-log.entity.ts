@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
 @Entity('audit_logs')
@@ -27,7 +34,7 @@ export class AuditLog {
   @CreateDateColumn()
   action_timestamp: Date;
 
-  @ManyToOne(() => User, user => user.user_id, { onDelete: 'SET NULL' })
+  @ManyToOne(() => User, (user) => user.user_id, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

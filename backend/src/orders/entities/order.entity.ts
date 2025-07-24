@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+  CreateDateColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { OrderItem } from '../../order-items/entities/order-item.entity';
 
@@ -30,10 +38,10 @@ export class Order {
   @Column('text')
   shipping_address: string;
 
-  @ManyToOne(() => User, user => user.user_id)
+  @ManyToOne(() => User, (user) => user.user_id)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @OneToMany(() => OrderItem, orderItem => orderItem.order)
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
   order_items: OrderItem[];
 }
