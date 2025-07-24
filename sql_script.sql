@@ -250,9 +250,8 @@ BEGIN
     ELSE
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cart is empty or does not exist.';
     END IF;
-END$$
-
-DELIMITER ;
+END
+$$ DELIMITER ;
 
 -- ==============================
 --          MOCK DATA
