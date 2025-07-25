@@ -38,6 +38,9 @@ export class Order {
   @Column('text')
   shipping_address: string;
 
+  @Column({ nullable: true })
+  currency_id: number;
+
   @ManyToOne(() => User, (user) => user.user_id)
   @JoinColumn({ name: 'user_id' })
   user: User;

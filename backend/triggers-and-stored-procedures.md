@@ -140,7 +140,7 @@ $$ DELIMITER ;
 ### 8. `log_product_price_update`
 
 - **Event:** `AFTER UPDATE` on `products`
-- **Purpose:** Logs any changes to a product's price in the `audit_logs` table. This is useful for tracking price history and for auditing purposes.
+- **Purpose:** Logs any changes to a product's price in the `transaction_logs` table. This is useful for tracking price history and for auditing purposes.
 
 ```sql
 DELIMITER $$
@@ -149,9 +149,26 @@ AFTER UPDATE ON products
 FOR EACH ROW
 BEGIN
     IF OLD.price <> NEW.price THEN
-        INSERT INTO audit_logs (action_type, table_name, record_id, old_value, new_value)
+        INSERT INTO transaction_logs (action_type, table_name, record_id, old_value, new_value)
         VALUES ('UPDATE_PRODUCT_PRICE', 'products', NEW.product_id, OLD.price, NEW.price);
     END IF;
+END
+$$ DELIMITER ;
+```
+
+### 9. `after_insert_order_log_transaction`
+
+- **Event:** `AFTER INSERT` on `orders`
+- **Purpose:** Automatically logs a "creation" transaction whenever a new order is placed.
+
+```sql
+DELIMITER $$
+CREATE TRIGGER after_insert_order_log_transaction
+AFTER INSERT ON orders
+FOR EACH ROW
+BEGIN
+    INSERT INTO transaction_logs (user_id, action_type, table_name, record_id, new_value)
+    VALUES (NEW.user_id, 'ORDER_CREATED', 'orders', NEW.order_id, CONCAT('Total: ', NEW.total_amount));
 END
 $$ DELIMITER ;
 ```
@@ -210,27 +227,87 @@ CREATE PROCEDURE CreateOrderFromCart(IN p_user_id INT, IN p_shipping_address TEX
 BEGIN
     DECLARE v_cart_id INT;
     DECLARE v_order_id INT;
+    DECLARE v_total_amount DECIMAL(10, 2);
+    DECLARE v_currency_id INT;
+
+    -- Start the transaction
+    START TRANSACTION;
 
     SELECT cart_id INTO v_cart_id FROM cart WHERE user_id = p_user_id;
 
     IF v_cart_id IS NOT NULL AND (SELECT COUNT(*) FROM cart_items WHERE cart_id = v_cart_id) > 0 THEN
-        INSERT INTO orders (user_id, shipping_address, total_amount, status)
-        VALUES (p_user_id, p_shipping_address, 0.00, 'pending');
+        -- Assume a default currency or determine from user/product preferences
+        SET v_currency_id = 1; -- Default to PHP, for example
+
+        -- Create the order record
+        INSERT INTO orders (user_id, shipping_address, total_amount, status, currency_id)
+        VALUES (p_user_id, p_shipping_address, 0.00, 'pending', v_currency_id);
         SET v_order_id = LAST_INSERT_ID();
 
+        -- Move items from cart to order_items
         INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase)
         SELECT v_order_id, ci.product_id, ci.quantity, p.price
         FROM cart_items ci
         JOIN products p ON ci.product_id = p.product_id
         WHERE ci.cart_id = v_cart_id;
 
-        DELETE FROM cart_items WHERE cart_id = v_cart_id;
+        -- Check for errors (e.g., from triggers)
+        IF @@error_count > 0 THEN
+            ROLLBACK;
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error occurred during order creation. Transaction rolled back.';
+        ELSE
+            -- Clear the cart
+            DELETE FROM cart_items WHERE cart_id = v_cart_id;
 
-        SELECT v_order_id AS new_order_id;
+            -- Commit the transaction
+            COMMIT;
+            SELECT v_order_id AS new_order_id;
+        END IF;
     ELSE
+        ROLLBACK;
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cart is empty or does not exist.';
     END IF;
 END
 $$ DELIMITER ;
 ```
 
+### 4. `UpdateStock(IN p_product_id INT, IN p_new_quantity INT)`
+
+- **Purpose:** Safely updates the stock quantity for a given product.
+
+```sql
+DELIMITER $$
+CREATE PROCEDURE UpdateStock(IN p_product_id INT, IN p_new_quantity INT)
+BEGIN
+    IF p_new_quantity < 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Stock quantity cannot be negative.';
+    ELSE
+        UPDATE inventory SET stock_quantity = p_new_quantity WHERE product_id = p_product_id;
+    END IF;
+END
+$$ DELIMITER ;
+```
+
+### 5. `LogTransaction(IN p_order_id INT, IN p_payment_method VARCHAR(50), IN p_status VARCHAR(50), IN p_amount DECIMAL(10,2))`
+
+- **Purpose:** Logs payment activity for an order in the `transaction_logs` table.
+
+```sql
+DELIMITER $$
+CREATE PROCEDURE LogTransaction(
+    IN p_order_id INT,
+    IN p_payment_method VARCHAR(50),
+    IN p_status VARCHAR(50),
+    IN p_amount DECIMAL(10,2)
+)
+BEGIN
+    INSERT INTO transaction_logs (action_type, table_name, record_id, new_value)
+    VALUES (
+        'PAYMENT_ATTEMPT',
+        'orders',
+        p_order_id,
+        CONCAT('Method: ', p_payment_method, ', Status: ', p_status, ', Amount: ', p_amount)
+    );
+END
+$$ DELIMITER ;
+```

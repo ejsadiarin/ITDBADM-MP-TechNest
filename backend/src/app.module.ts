@@ -12,6 +12,9 @@ import { CartItemsModule } from './cart-items/cart-items.module';
 import { OrdersModule } from './orders/orders.module';
 import { OrderItemsModule } from './order-items/order-items.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { CurrenciesModule } from './currencies.module';
+import { CurrenciesController } from './currencies/currencies.controller';
+import { CurrenciesService } from './currencies/currencies.service';
 
 @Module({
   imports: [
@@ -40,9 +43,10 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module';
     CartItemsModule,
     OrdersModule,
     OrderItemsModule,
-    AuditLogsModule,
+    TransactionLogsModule,
+    CurrenciesModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, CurrenciesController],
+  providers: [AppService, CurrenciesService],
 })
 export class AppModule {}

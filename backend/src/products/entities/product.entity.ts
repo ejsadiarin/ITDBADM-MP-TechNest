@@ -35,6 +35,9 @@ export class Product {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @Column({ nullable: true })
+  currency_id: number;
+
   // Assuming a Category entity exists and there's a many-to-one relationship
   // @ManyToOne(() => Category, category => category.products)
   // @JoinColumn({ name: 'category_id' })
