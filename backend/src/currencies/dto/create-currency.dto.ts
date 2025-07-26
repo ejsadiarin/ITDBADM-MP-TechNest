@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsEnum } from 'class-validator';
+import { IsNumber, IsEnum } from 'class-validator';
 import { CurrencyCode, CurrencySymbol } from '../entities/currency.entity';
 
 export class CreateCurrencyDto {

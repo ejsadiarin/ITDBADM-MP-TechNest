@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { Inventory } from './entities/inventory.entity';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
@@ -8,23 +8,38 @@ import { UpdateInventoryDto } from './dto/update-inventory.dto';
 @Injectable()
 export class InventoryService {
   constructor(
-    @InjectRepository(Inventory)
-    private inventoryRepository: Repository<Inventory>,
+    @InjectDataSource()
+    private dataSource: DataSource,
   ) {}
 
   async create(createInventoryDto: CreateInventoryDto): Promise<Inventory> {
-    const inventory = this.inventoryRepository.create(createInventoryDto);
-    return this.inventoryRepository.save(inventory);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const result: any[] = await queryRunner.query(
+        'INSERT INTO inventory(product_id, stock_quantity) VALUES (?, ?)',
+        [createInventoryDto.product_id, createInventoryDto.stock_quantity],
+      );
+      await queryRunner.commitTransaction();
+      return this.findOne(result[0].insertId);
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async findAll(): Promise<Inventory[]> {
-    return this.inventoryRepository.find();
+    return await this.dataSource.query('SELECT * FROM inventory');
   }
 
   async findOne(id: number): Promise<Inventory> {
-    const inventory = await this.inventoryRepository.findOne({
-      where: { inventory_id: id },
-    });
+    const [inventory] = await this.dataSource.query(
+      'SELECT * FROM inventory WHERE inventory_id = ?',
+      [id],
+    );
     if (!inventory) {
       throw new NotFoundException(`Inventory with ID ${id} not found`);
     }
@@ -35,15 +50,42 @@ export class InventoryService {
     id: number,
     updateInventoryDto: UpdateInventoryDto,
   ): Promise<Inventory> {
-    const inventory = await this.findOne(id);
-    Object.assign(inventory, updateInventoryDto);
-    return this.inventoryRepository.save(inventory);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await queryRunner.query('UPDATE inventory SET ? WHERE inventory_id = ?', [
+        updateInventoryDto,
+        id,
+      ]);
+      await queryRunner.commitTransaction();
+      return this.findOne(id);
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async remove(id: number): Promise<void> {
-    const result = await this.inventoryRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Inventory with ID ${id} not found`);
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const result: any[] = await queryRunner.query(
+        'DELETE FROM inventory WHERE inventory_id = ?',
+        [id],
+      );
+      if (result[0].affectedRows === 0) {
+        throw new NotFoundException(`Inventory with ID ${id} not found`);
+      }
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
   }
 }
