@@ -246,6 +246,8 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
 ### **Triggers (9 Total)**
 
 1.  **`before_insert_order_item_check_stock`**
+    - **Event:** `BEFORE INSERT` on `order_items`
+    - **Purpose:** Prevents an `order_item` from being inserted if there is not enough stock available for the product. This ensures that customers cannot order more items than are available in the inventory.
     ```sql
     DELIMITER $$
     CREATE TRIGGER before_insert_order_item_check_stock
@@ -262,6 +264,8 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     ```
 
 2.  **`after_insert_order_item_decrease_stock`**
+    - **Event:** `AFTER INSERT` on `order_items`
+    - **Purpose:** Automatically decreases the `stock_quantity` in the `inventory` table after a new `order_item` is successfully added. This keeps the inventory levels accurate in real-time.
     ```sql
     DELIMITER $$
     CREATE TRIGGER after_insert_order_item_decrease_stock
@@ -274,6 +278,8 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     ```
 
 3.  **`after_update_order_status_increase_stock`**
+    - **Event:** `AFTER UPDATE` on `orders`
+    - **Purpose:** If an order's status is updated to `'cancelled'`, this trigger restocks the inventory by adding the quantities of the cancelled items back. This is essential for managing returns and cancellations.
     ```sql
     DELIMITER $$
     CREATE TRIGGER after_update_order_status_increase_stock
@@ -291,6 +297,8 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     ```
 
 4.  **`after_insert_order_item_update_order_total`**
+    - **Event:** `AFTER INSERT` on `order_items`
+    - **Purpose:** Ensures that the `total_amount` for an order in the `orders` table is correctly updated whenever a new `order_item` is added.
     ```sql
     DELIMITER $$
     CREATE TRIGGER after_insert_order_item_update_order_total
@@ -305,6 +313,8 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     ```
 
 5.  **`after_delete_order_item_update_order_total`**
+    - **Event:** `AFTER DELETE` on `order_items`
+    - **Purpose:** Ensures the `total_amount` for an order is updated whenever an `order_item` is removed. This is crucial for order modifications.
     ```sql
     DELIMITER $$
     CREATE TRIGGER after_delete_order_item_update_order_total
@@ -319,6 +329,8 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     ```
 
 6.  **`before_update_product_price_check_zero`**
+    - **Event:** `BEFORE UPDATE` on `products`
+    - **Purpose:** Prevents the price of a product from being updated to a negative value, maintaining data integrity.
     ```sql
     DELIMITER $$
     CREATE TRIGGER before_update_product_price_check_zero
@@ -333,6 +345,8 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     ```
 
 7.  **`before_delete_user_check_orders`**
+    - **Event:** `BEFORE DELETE` on `users`
+    - **Purpose:** Prevents a user from being deleted if they have existing orders, which maintains referential integrity and prevents orphaned order records.
     ```sql
     DELIMITER $$
     CREATE TRIGGER before_delete_user_check_orders
@@ -349,6 +363,8 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     ```
 
 8.  **`log_product_price_update`**
+    - **Event:** `AFTER UPDATE` on `products`
+    - **Purpose:** Logs any changes to a product's price in the `transaction_logs` table. This is useful for tracking price history and for auditing purposes.
     ```sql
     DELIMITER $$
     CREATE TRIGGER log_product_price_update
@@ -364,6 +380,8 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     ```
 
 9.  **`after_insert_order_log_transaction`**
+    - **Event:** `AFTER INSERT` on `orders`
+    - **Purpose:** Automatically logs a "creation" transaction whenever a new order is placed.
     ```sql
     DELIMITER $$
     CREATE TRIGGER after_insert_order_log_transaction
@@ -379,6 +397,9 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
 ### **Stored Procedures (5 Total)**
 
 1.  **`GetProductDetails`**
+    - **Purpose:** Retrieves all details for a specific product, including its category name and current stock quantity. This provides a comprehensive view of a single product for display on a product page.
+    - **Parameters:**
+      - `product_id_param INT`: The ID of the product to retrieve.
     ```sql
     DELIMITER $$
     CREATE PROCEDURE GetProductDetails(IN product_id_param INT)
@@ -395,6 +416,7 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     ```
 
 2.  **`GetUsersWithPendingOrders`**
+    - **Purpose:** Returns a list of users who currently have orders with a `'pending'` or `'processing'` status. This is useful for administrative purposes, such as identifying orders that need to be fulfilled.
     ```sql
     DELIMITER $$
     CREATE PROCEDURE GetUsersWithPendingOrders()
@@ -408,6 +430,10 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     ```
 
 3.  **`CreateOrderFromCart`**
+    - **Purpose:** Creates a new order for a user based on the items in their cart. It calculates the total price, moves cart items to order items, and then clears the user's cart.
+    - **Parameters:**
+      - `p_user_id INT`: The ID of the user placing the order.
+      - `p_shipping_address TEXT`: The shipping address for the order.
     ```sql
     DELIMITER $$
     CREATE PROCEDURE CreateOrderFromCart(IN p_user_id INT, IN p_shipping_address TEXT)
@@ -454,6 +480,10 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     ```
 
 4.  **`UpdateStock`**
+    - **Purpose:** Safely updates the stock quantity for a given product.
+    - **Parameters:**
+        - `p_product_id INT`: The ID of the product to update.
+        - `p_new_quantity INT`: The new stock quantity.
     ```sql
     DELIMITER $$
     CREATE PROCEDURE UpdateStock(IN p_product_id INT, IN p_new_quantity INT)
@@ -468,6 +498,12 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     ```
 
 5.  **`LogTransaction`**
+    - **Purpose:** Logs payment activity for an order in the `transaction_logs` table.
+    - **Parameters:**
+        - `p_order_id INT`: The ID of the order.
+        - `p_payment_method VARCHAR(50)`: The payment method used.
+        - `p_status VARCHAR(50)`: The status of the payment.
+        - `p_amount DECIMAL(10,2)`: The amount of the transaction.
     ```sql
     DELIMITER $$
     CREATE PROCEDURE LogTransaction(

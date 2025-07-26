@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS products (
     brand VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+    CONSTRAINT fk_products_categories FOREIGN KEY (category_id) REFERENCES categories(category_id)
 );
 
 -- Inventory Table: Manages stock levels for each product.
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS inventory (
     product_id INT NOT NULL UNIQUE,
     stock_quantity INT NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+    CONSTRAINT fk_inventory_products FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
 
 -- Cart Table: A persistent cart for each user.
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS cart (
     user_id INT NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    CONSTRAINT fk_cart_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- Cart Items Table: Links products to a user's cart.
@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS cart_items (
     product_id INT NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0),
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (cart_id) REFERENCES cart(cart_id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+    CONSTRAINT fk_cart_items_cart FOREIGN KEY (cart_id) REFERENCES cart(cart_id) ON DELETE CASCADE,
+    CONSTRAINT fk_cart_items_products FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
     UNIQUE(cart_id, product_id)
 );
 
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS orders (
     total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0),
     status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') NOT NULL DEFAULT 'pending',
     shipping_address TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    CONSTRAINT fk_orders_users FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 -- Order Items Table: Links products to specific orders.
@@ -86,8 +86,8 @@ CREATE TABLE IF NOT EXISTS order_items (
     product_id INT NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0),
     price_at_purchase DECIMAL(10, 2) NOT NULL CHECK (price_at_purchase >= 0),
-    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(product_id)
+    CONSTRAINT fk_order_items_orders FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    CONSTRAINT fk_order_items_products FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
 -- Audit Logs Table: Tracks important changes in the database.
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     old_value TEXT,
     new_value TEXT,
     action_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+    CONSTRAINT fk_audit_logs_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
 
 
