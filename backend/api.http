@@ -10,6 +10,50 @@ GET http://localhost:3000/ HTTP/1.1
 
 ### 
 
+# Authentication Controller
+
+
+### 
+
+# Register User
+
+POST http://localhost:3000/auth/register HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "password123",
+  "first_name": "Test",
+  "last_name": "User",
+  "address": "123 Test St",
+  "phone_number": "123-456-7890"
+}
+
+
+### 
+
+# Login User
+
+POST http://localhost:3000/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+
+### 
+
+# Get User Profile
+
+GET http://localhost:3000/auth/profile HTTP/1.1
+Authorization: Bearer YOUR_JWT_TOKEN
+
+
+### 
+
 # Products Controller
 
 
@@ -430,14 +474,14 @@ DELETE http://localhost:3000/order-items/1 HTTP/1.1
 
 ### 
 
-# Audit Logs Controller
+# Transaction Logs Controller
 
 
 ### 
 
-# Create Audit Log
+# Create Transaction Log
 
-POST http://localhost:3000/audit-logs HTTP/1.1
+POST http://localhost:3000/transaction-logs HTTP/1.1
 Content-Type: application/json
 
 {
@@ -451,23 +495,23 @@ Content-Type: application/json
 
 ### 
 
-# Get All Audit Logs
+# Get All Transaction Logs
 
-GET http://localhost:3000/audit-logs HTTP/1.1
-
-
-### 
-
-# Get Audit Log by ID
-
-GET http://localhost:3000/audit-logs/1 HTTP/1.1
+GET http://localhost:3000/transaction-logs HTTP/1.1
 
 
 ### 
 
-# Update Audit Log
+# Get Transaction Log by ID
 
-PATCH http://localhost:3000/audit-logs/1 HTTP/1.1
+GET http://localhost:3000/transaction-logs/1 HTTP/1.1
+
+
+### 
+
+# Update Transaction Log
+
+PATCH http://localhost:3000/transaction-logs/1 HTTP/1.1
 Content-Type: application/json
 
 {
@@ -477,6 +521,58 @@ Content-Type: application/json
 
 ### 
 
-# Delete Audit Log
+# Delete Transaction Log
 
-DELETE http://localhost:3000/audit-logs/1 HTTP/1.1
+DELETE http://localhost:3000/transaction-logs/1 HTTP/1.1
+
+
+### 
+
+# Currencies Controller
+
+
+### 
+
+# Create Currency
+
+POST http://localhost:3000/currencies HTTP/1.1
+Content-Type: application/json
+
+{
+  "currency_code": "PHP",
+  "exchange_rate_to_usd": 58,
+  "symbol": "₱"
+}
+
+
+### 
+
+# Get All Currencies
+
+GET http://localhost:3000/currencies HTTP/1.1
+
+
+### 
+
+# Get Currency by ID
+
+GET http://localhost:3000/currencies/1 HTTP/1.1
+
+
+### 
+
+# Update Currency
+
+PATCH http://localhost:3000/currencies/1 HTTP/1.1
+Content-Type: application/json
+
+{
+  "exchange_rate_to_usd": 55
+}
+
+
+### 
+
+# Delete Currency
+
+DELETE http://localhost:3000/currencies/1 HTTP/1.1

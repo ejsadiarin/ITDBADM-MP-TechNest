@@ -44,8 +44,8 @@ CREATE TABLE IF NOT EXISTS products (
     brand VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (category_id) REFERENCES categories(category_id),
-    FOREIGN KEY (currency_id) REFERENCES currencies(currency_id)
+    CONSTRAINT fk_products_categories FOREIGN KEY (category_id) REFERENCES categories(category_id),
+    CONSTRAINT fk_products_currencies FOREIGN KEY (currency_id) REFERENCES currencies(currency_id)
 );
 
 -- Inventory Table: Manages stock levels for each product.
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS inventory (
     product_id INT NOT NULL UNIQUE,
     stock_quantity INT NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+    CONSTRAINT fk_inventory_products FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
 
 -- Cart Table: A persistent cart for each user.
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS cart (
     user_id INT NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    CONSTRAINT fk_cart_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- Cart Items Table: Links products to a user's cart.
@@ -73,8 +73,8 @@ CREATE TABLE IF NOT EXISTS cart_items (
     product_id INT NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0),
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (cart_id) REFERENCES cart(cart_id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+    CONSTRAINT fk_cart_items_cart FOREIGN KEY (cart_id) REFERENCES cart(cart_id) ON DELETE CASCADE,
+    CONSTRAINT fk_cart_items_products FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
     UNIQUE(cart_id, product_id)
 );
 
@@ -87,8 +87,8 @@ CREATE TABLE IF NOT EXISTS orders (
     status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') NOT NULL DEFAULT 'pending',
     shipping_address TEXT NOT NULL,
     currency_id INT,
-    FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (currency_id) REFERENCES currencies(currency_id)
+    CONSTRAINT fk_orders_users FOREIGN KEY (user_id) REFERENCES users(user_id),
+    CONSTRAINT fk_orders_currencies FOREIGN KEY (currency_id) REFERENCES currencies(currency_id)
 );
 
 -- Order Items Table: Links products to specific orders.
@@ -98,8 +98,8 @@ CREATE TABLE IF NOT EXISTS order_items (
     product_id INT NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0),
     price_at_purchase DECIMAL(10, 2) NOT NULL CHECK (price_at_purchase >= 0),
-    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(product_id)
+    CONSTRAINT fk_order_items_orders FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    CONSTRAINT fk_order_items_products FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
 -- Transaction Logs Table: Tracks important changes in the database.
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     old_value TEXT,
     new_value TEXT,
     action_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+    CONSTRAINT fk_transaction_logs_users FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
 
 
@@ -120,9 +120,8 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
 --          TRIGGERS
 -- ==============================
 
-DELIMITER $$
-
 -- Prevents inserting an order item if stock is insufficient.
+DELIMITER $$
 CREATE TRIGGER before_insert_order_item_check_stock
 BEFORE INSERT ON order_items
 FOR EACH ROW
@@ -132,17 +131,22 @@ BEGIN
     IF NEW.quantity > available_stock THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Insufficient stock for this product.';
     END IF;
-END$$
+END
+$$ DELIMITER ;
+
 
 -- Decreases stock quantity after an order item is inserted.
+DELIMITER $$
 CREATE TRIGGER after_insert_order_item_decrease_stock
 AFTER INSERT ON order_items
 FOR EACH ROW
 BEGIN
     UPDATE inventory SET stock_quantity = stock_quantity - NEW.quantity, last_updated = CURRENT_TIMESTAMP WHERE product_id = NEW.product_id;
-END$$
+END
+$$ DELIMITER ;
 
 -- Increases stock quantity if an order is cancelled.
+DELIMITER $$
 CREATE TRIGGER after_update_order_status_increase_stock
 AFTER UPDATE ON orders
 FOR EACH ROW
@@ -153,9 +157,11 @@ BEGIN
         SET i.stock_quantity = i.stock_quantity + oi.quantity, i.last_updated = CURRENT_TIMESTAMP
         WHERE oi.order_id = NEW.order_id;
     END IF;
-END$$
+END
+$$ DELIMITER ;
 
 -- Updates the total order amount after inserting a new order item.
+DELIMITER $$
 CREATE TRIGGER after_insert_order_item_update_order_total
 AFTER INSERT ON order_items
 FOR EACH ROW
@@ -163,9 +169,11 @@ BEGIN
     UPDATE orders
     SET total_amount = (SELECT SUM(quantity * price_at_purchase) FROM order_items WHERE order_id = NEW.order_id)
     WHERE order_id = NEW.order_id;
-END$$
+END
+$$ DELIMITER ;
 
 -- Updates the total order amount after deleting an order item.
+DELIMITER $$
 CREATE TRIGGER after_delete_order_item_update_order_total
 AFTER DELETE ON order_items
 FOR EACH ROW
@@ -173,9 +181,11 @@ BEGIN
     UPDATE orders
     SET total_amount = COALESCE((SELECT SUM(quantity * price_at_purchase) FROM order_items WHERE order_id = OLD.order_id), 0.00)
     WHERE order_id = OLD.order_id;
-END$$
+END
+$$ DELIMITER ;
 
 -- Prevents updating a product price to a negative value.
+DELIMITER $$
 CREATE TRIGGER before_update_product_price_check_zero
 BEFORE UPDATE ON products
 FOR EACH ROW
@@ -183,9 +193,11 @@ BEGIN
     IF NEW.price < 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Product price cannot be negative.';
     END IF;
-END$$
+END
+$$ DELIMITER ;
 
 -- Prevents deleting a user if they have existing orders.
+DELIMITER $$
 CREATE TRIGGER before_delete_user_check_orders
 BEFORE DELETE ON users
 FOR EACH ROW
@@ -195,9 +207,11 @@ BEGIN
     IF order_count > 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot delete user; existing orders are associated with this user.';
     END IF;
-END$$
+END
+$$ DELIMITER ;
 
 -- Logs changes to product prices.
+DELIMITER $$
 CREATE TRIGGER log_product_price_update
 AFTER UPDATE ON products
 FOR EACH ROW
@@ -206,26 +220,26 @@ BEGIN
         INSERT INTO transaction_logs (action_type, table_name, record_id, old_value, new_value)
         VALUES ('UPDATE_PRODUCT_PRICE', 'products', NEW.product_id, OLD.price, NEW.price);
     END IF;
-END$$
+END
+$$ DELIMITER ;
 
 -- Logs a new transaction every time an order is created
+DELIMITER $$
 CREATE TRIGGER after_insert_order_log_transaction
 AFTER INSERT ON orders
 FOR EACH ROW
 BEGIN
     INSERT INTO transaction_logs (user_id, action_type, table_name, record_id, new_value)
     VALUES (NEW.user_id, 'ORDER_CREATED', 'orders', NEW.order_id, CONCAT('Total: ', NEW.total_amount));
-END$$
-
-DELIMITER ;
+END
+$$ DELIMITER ;
 
 -- ==============================
 --      STORED PROCEDURES
 -- ==============================
 
-DELIMITER $$
-
 -- Retrieves full details for a specific product.
+DELIMITER $$
 CREATE PROCEDURE GetProductDetails(IN product_id_param INT)
 BEGIN
     SELECT
@@ -235,18 +249,22 @@ BEGIN
     JOIN categories c ON p.category_id = c.category_id
     LEFT JOIN inventory i ON p.product_id = i.product_id
     WHERE p.product_id = product_id_param;
-END$$
+END
+$$ DELIMITER ;
 
 -- Retrieves a list of users with pending or processing orders.
+DELIMITER $$
 CREATE PROCEDURE GetUsersWithPendingOrders()
 BEGIN
     SELECT DISTINCT u.user_id, u.username, u.email, u.first_name, u.last_name, u.phone_number
     FROM users u
     JOIN orders o ON u.user_id = o.user_id
     WHERE o.status IN ('pending', 'processing');
-END$$
+END
+$$ DELIMITER ;
 
 -- Creates a new order from a user's cart and clears the cart.
+DELIMITER $$
 CREATE PROCEDURE CreateOrderFromCart(IN p_user_id INT, IN p_shipping_address TEXT)
 BEGIN
     DECLARE v_cart_id INT;
@@ -291,9 +309,11 @@ BEGIN
         ROLLBACK;
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cart is empty or does not exist.';
     END IF;
-END$$
+END
+$$ DELIMITER ;
 
 -- Safely updates the stock quantity for a given product
+DELIMITER $$
 CREATE PROCEDURE UpdateStock(IN p_product_id INT, IN p_new_quantity INT)
 BEGIN
     IF p_new_quantity < 0 THEN
@@ -301,9 +321,11 @@ BEGIN
     ELSE
         UPDATE inventory SET stock_quantity = p_new_quantity WHERE product_id = p_product_id;
     END IF;
-END$$
+END
+$$ DELIMITER ;
 
 -- Logs payment activity for an order in the transaction_logs table
+DELIMITER $$
 CREATE PROCEDURE LogTransaction(
     IN p_order_id INT,
     IN p_payment_method VARCHAR(50),
@@ -318,9 +340,8 @@ BEGIN
         p_order_id,
         CONCAT('Method: ', p_payment_method, ', Status: ', p_status, ', Amount: ', p_amount)
     );
-END$$
-
-DELIMITER ;
+END
+$$ DELIMITER ;
 
 -- ==============================
 --          MOCK DATA
