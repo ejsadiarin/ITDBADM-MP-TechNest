@@ -1,8 +1,10 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateAuditLogDto } from './create-audit-log.dto';
+import { CreateTransactionLogDto } from './create-transaction-log.dto';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class UpdateAuditLogDto extends PartialType(CreateAuditLogDto) {
+export class UpdateTransactionLogDto extends PartialType(
+  CreateTransactionLogDto,
+) {
   @IsOptional()
   @IsNumber()
   user_id?: number;

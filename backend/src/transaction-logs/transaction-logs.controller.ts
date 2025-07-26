@@ -13,7 +13,9 @@ import { UpdateTransactionLogDto } from './dto/update-transaction-log.dto';
 
 @Controller('transaction-logs')
 export class TransactionLogsController {
-  constructor(private readonly transactionLogsService: TransactionLogsService) {}
+  constructor(
+    private readonly transactionLogsService: TransactionLogsService,
+  ) {}
 
   @Post()
   create(@Body() createTransactionLogDto: CreateTransactionLogDto) {

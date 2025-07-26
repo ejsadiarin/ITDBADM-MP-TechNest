@@ -1,7 +1,6 @@
-import { UserRole } from '../entities/user.entity';
 import { IsString, IsEmail, IsOptional } from 'class-validator';
 
-export class CreateUserDto {
+export class RegisterAuthDto {
   @IsString()
   username: string;
 
@@ -9,7 +8,7 @@ export class CreateUserDto {
   email: string;
 
   @IsString()
-  password: string; // This will be hashed in the service
+  password: string; // This should be hashed in a real application
 
   @IsOptional()
   @IsString()
@@ -26,6 +25,4 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   phone_number?: string;
-
-  role: UserRole;
 }

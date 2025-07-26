@@ -1,6 +1,6 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class CreateAuditLogDto {
+export class CreateTransactionLogDto {
   @IsOptional()
   @IsNumber()
   user_id?: number;

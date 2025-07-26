@@ -11,10 +11,11 @@ import { CartModule } from './cart/cart.module';
 import { CartItemsModule } from './cart-items/cart-items.module';
 import { OrdersModule } from './orders/orders.module';
 import { OrderItemsModule } from './order-items/order-items.module';
-import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { TransactionLogsModule } from './transaction-logs/transaction-logs.module';
 import { CurrenciesModule } from './currencies.module';
 import { CurrenciesController } from './currencies/currencies.controller';
 import { CurrenciesService } from './currencies/currencies.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { CurrenciesService } from './currencies/currencies.service';
     OrderItemsModule,
     TransactionLogsModule,
     CurrenciesModule,
+    AuthModule,
   ],
   controllers: [AppController, CurrenciesController],
   providers: [AppService, CurrenciesService],
