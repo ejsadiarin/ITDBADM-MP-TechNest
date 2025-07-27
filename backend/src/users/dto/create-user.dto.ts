@@ -27,5 +27,6 @@ export class CreateUserDto {
   @IsString()
   phone_number?: string;
 
+  @IsString()
   role: UserRole;
 }

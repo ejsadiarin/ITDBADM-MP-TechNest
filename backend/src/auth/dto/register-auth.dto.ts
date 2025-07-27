@@ -1,4 +1,5 @@
 import { IsString, IsEmail, IsOptional } from 'class-validator';
+import { UserRole } from 'src/users/entities/user.entity';
 
 export class RegisterAuthDto {
   @IsString()
@@ -25,4 +26,7 @@ export class RegisterAuthDto {
   @IsOptional()
   @IsString()
   phone_number?: string;
+
+  @IsString()
+  role: UserRole;
 }
