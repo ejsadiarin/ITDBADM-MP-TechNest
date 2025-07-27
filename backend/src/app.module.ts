@@ -12,9 +12,7 @@ import { CartItemsModule } from './cart-items/cart-items.module';
 import { OrdersModule } from './orders/orders.module';
 import { OrderItemsModule } from './order-items/order-items.module';
 import { TransactionLogsModule } from './transaction-logs/transaction-logs.module';
-import { CurrenciesModule } from './currencies.module';
-import { CurrenciesController } from './currencies/currencies.controller';
-import { CurrenciesService } from './currencies/currencies.service';
+import { CurrenciesModule } from './currencies/currencies.module';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
@@ -48,7 +46,7 @@ import { AuthModule } from './auth/auth.module';
     CurrenciesModule,
     AuthModule,
   ],
-  controllers: [AppController, CurrenciesController],
-  providers: [AppService, CurrenciesService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
