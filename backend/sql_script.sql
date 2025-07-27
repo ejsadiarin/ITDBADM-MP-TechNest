@@ -355,10 +355,10 @@ INSERT INTO currencies (currency_code, symbol, exchange_rate_to_usd) VALUES
 
 -- Insert Users (Admin, Staff, Customer)
 INSERT INTO users (username, email, password_hash, first_name, last_name, address, phone_number, role) VALUES
-('admin_user', 'admin@technest.com', '$2b$10$examplehash.admin', 'Admin', 'User', '1 Admin Way', '111-222-3333', 'admin'),
-('staff_user', 'staff@technest.com', '$2b$10$examplehash.staff', 'Staff', 'Person', '2 Staff St', '444-555-6666', 'staff'),
-('johndoe', 'john.doe@email.com', '$2b$10$examplehash.customer', 'John', 'Doe', '123 Maple Street', '123-456-7890', 'customer'),
-('janesmith', 'jane.smith@email.com', '$2b$10$examplehash.customer2', 'Jane', 'Smith', '456 Oak Avenue', '987-654-3210', 'customer');
+('admin_user', 'admin@technest.com', '$2b$10$yMfwO3gnXWIzGUdKSTCVb.dnAnu8OqmV.JlHQ1MmBvylGNb6XVkPi', 'Admin', 'User', '1 Admin Way', '111-222-3333', 'admin'),
+('staff_user', 'staff@technest.com', '$2b$10$yMfwO3gnXWIzGUdKSTCVb.dnAnu8OqmV.JlHQ1MmBvylGNb6XVkPi', 'Staff', 'Person', '2 Staff St', '444-555-6666', 'staff'),
+('johndoe', 'john.doe@email.com', '$2b$10$yMfwO3gnXWIzGUdKSTCVb.dnAnu8OqmV.JlHQ1MmBvylGNb6XVkPi', 'John', 'Doe', '123 Maple Street', '123-456-7890', 'customer'),
+('janesmith', 'jane.smith@email.com', '$2b$10$yMfwO3gnXWIzGUdKSTCVb.dnAnu8OqmV.JlHQ1MmBvylGNb6XVkPi', 'Jane', 'Smith', '456 Oak Avenue', '987-654-3210', 'customer');
 
 -- Insert Categories
 INSERT INTO categories (name, description) VALUES
