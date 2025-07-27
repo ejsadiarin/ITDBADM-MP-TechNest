@@ -1,120 +1,95 @@
-###
-# TechNest API Requests
-#
-# This file contains sample requests for the TechNest API.
-# It is recommended to use a REST client extension that supports .http files (like the one in VS Code).
-#
-# How to use:
-# 1. Make sure the backend server is running.
-# 2. Run the "Login User (admin)" or "Login User (customer)" request to get an authentication token.
-#    The token will be automatically saved to a variable (`@adminToken` or `@customerToken`).
-# 3. Subsequent requests that require authentication will automatically use the appropriate token.
+### REST API Tests for TechNest Backend
 
-###
-# ==============================
-#      App Controller
-# ==============================
-###
+### Global Variables
+@baseUrl = http://localhost:3000
+@adminToken = 
+@customerToken = 
+@userId = 3
+@productId = 1
+@categoryId = 1
+@inventoryId = 1
+@cartId = 1
+@cartItemId = 1
+@orderId = 1
+@currencyId = 1
+@transactionLogId = 1
 
-# Get Hello
-GET http://localhost:3000/ HTTP/1.1
+### App Controller ###
 
-###
-# ==============================
-#   Authentication Controller
-# ==============================
-###
+### Get Hello
+GET {{baseUrl}}/ HTTP/1.1
 
-# Register User
-# Note: The default role upon registration is 'customer'.
-POST http://localhost:3000/auth/register HTTP/1.1
+### Authentication Controller ###
+
+### Register User
+POST {{baseUrl}}/auth/register HTTP/1.1
 Content-Type: application/json
 
 {
-  "username": "new_customer",
+  "address": "456 New Ave",
   "email": "customer@example.com",
-  "password": "password",
   "first_name": "New",
   "last_name": "Customer",
-  "address": "456 New Ave",
+  "password": "password",
   "phone_number": "555-555-5555",
-  "role": "customer"
+  "role": "customer",
+  "username": "new_customer"
 }
 
-###
-
-# Login User (admin)
+### Login User (admin)
 @name loginAdmin
-POST http://localhost:3000/auth/login HTTP/1.1
+POST {{baseUrl}}/auth/login HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "admin@technest.com",
-  "password": "password"
+ "email": "admin@technest.com",
+ "password": "password"
 }
-
 @adminToken = {{loginAdmin.response.body.accessToken}}
 
-###
-
-# Login User (customer)
+### Login User (customer)
 @name loginCustomer
-POST http://localhost:3000/auth/login HTTP/1.1
+POST {{baseUrl}}/auth/login HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "john.doe@email.com",
-  "password": "password"
+ "email": "john.doe@email.com",
+ "password": "password"
 }
-
 @customerToken = {{loginCustomer.response.body.accessToken}}
 
-###
-
-# Get User Profile (as Admin)
-GET http://localhost:3000/auth/profile HTTP/1.1
+### Get User Profile (as Admin)
+GET {{baseUrl}}/auth/profile HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-
-# Get User Profile (as Customer)
-GET http://localhost:3000/auth/profile HTTP/1.1
+### Get User Profile (as Customer)
+GET {{baseUrl}}/auth/profile HTTP/1.1
 Authorization: Bearer {{customerToken}}
 
-###
-# ==============================
-#      Products Controller
-# ==============================
-###
+### Products Controller ###
 
-# Get All Products
-GET http://localhost:3000/products HTTP/1.1
+### Get All Products
+GET {{baseUrl}}/products HTTP/1.1
 
-###
+### Get Product by ID
+GET {{baseUrl}}/products/{{productId}} HTTP/1.1
 
-# Get Product by ID
-GET http://localhost:3000/products/1 HTTP/1.1
-
-###
-
-# Create Product (Admin/Staff only)
-POST http://localhost:3000/products HTTP/1.1
+### Create Product (Admin/Staff only)
+POST {{baseUrl}}/products HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
 {
-  "name": "New Awesome Gadget",
-  "description": "A gadget that will change your life.",
-  "price": 199.99,
+  "brand": "InnovateCo",
   "category_id": 1,
+  "description": "A gadget that will change your life.",
   "image_url": "/images/gadget.jpg",
-  "brand": "InnovateCo"
+  "name": "New Awesome Gadget",
+  "price": 199.99
 }
 
-###
-
-# Update Product (Admin/Staff only)
-PATCH http://localhost:3000/products/1 HTTP/1.1
+### Update Product (Admin/Staff only)
+PATCH {{baseUrl}}/products/{{productId}} HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
@@ -122,51 +97,38 @@ Authorization: Bearer {{adminToken}}
   "price": 949.99
 }
 
-###
-
-# Delete Product (Admin only)
-DELETE http://localhost:3000/products/1 HTTP/1.1
+### Delete Product (Admin only)
+DELETE {{baseUrl}}/products/{{productId}} HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-# ==============================
-#        Users Controller
-# ==============================
-###
+### Users Controller ###
 
-# Get All Users (Admin only)
-GET http://localhost:3000/users HTTP/1.1
+### Get All Users (Admin only)
+GET {{baseUrl}}/users HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-
-# Get User by ID (Admin only)
-GET http://localhost:3000/users/3 HTTP/1.1
+### Get User by ID (Admin only)
+GET {{baseUrl}}/users/{{userId}} HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-
-# Create User (Admin only)
-# Note: This endpoint is available, but registration is the primary way to create users.
-POST http://localhost:3000/users HTTP/1.1
+### Create User (Admin only)
+POST {{baseUrl}}/users HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
 {
-  "username": "another_user",
+  "address": "789 Other St",
   "email": "another@example.com",
-  "password": "password123",
   "first_name": "Another",
   "last_name": "User",
-  "address": "789 Other St",
+  "password": "password123",
   "phone_number": "321-654-0987",
-  "role": "customer"
+  "role": "customer",
+  "username": "another_user"
 }
 
-###
-
-# Update User (Admin only)
-PATCH http://localhost:3000/users/4 HTTP/1.1
+### Update User (Admin only)
+PATCH {{baseUrl}}/users/4 HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
@@ -174,43 +136,30 @@ Authorization: Bearer {{adminToken}}
   "phone_number": "111-111-1111"
 }
 
-###
-
-# Delete User (Admin only)
-# Note: This will fail if the user has existing orders.
-DELETE http://localhost:3000/users/4 HTTP/1.1
+### Delete User (Admin only)
+DELETE {{baseUrl}}/users/4 HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-# ==============================
-#     Categories Controller
-# ==============================
-###
+### Categories Controller ###
 
-# Get All Categories
-GET http://localhost:3000/categories HTTP/1.1
+### Get All Categories
+GET {{baseUrl}}/categories HTTP/1.1
 
-###
+### Get Category by ID
+GET {{baseUrl}}/categories/{{categoryId}} HTTP/1.1
 
-# Get Category by ID
-GET http://localhost:3000/categories/1 HTTP/1.1
-
-###
-
-# Create Category (Admin/Staff only)
-POST http://localhost:3000/categories HTTP/1.1
+### Create Category (Admin/Staff only)
+POST {{baseUrl}}/categories HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
 {
-  "name": "Wearable Tech",
-  "description": "Smartwatches, fitness trackers, and more."
+  "description": "Smartwatches, fitness trackers, and more.",
+  "name": "Wearable Tech"
 }
 
-###
-
-# Update Category (Admin/Staff only)
-PATCH http://localhost:3000/categories/1 HTTP/1.1
+### Update Category (Admin/Staff only)
+PATCH {{baseUrl}}/categories/{{categoryId}} HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
@@ -218,33 +167,22 @@ Authorization: Bearer {{adminToken}}
   "description": "The very latest and greatest smartphones from top brands."
 }
 
-###
-
-# Delete Category (Admin only)
-DELETE http://localhost:3000/categories/5 HTTP/1.1
+### Delete Category (Admin only)
+DELETE {{baseUrl}}/categories/5 HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-# ==============================
-#      Inventory Controller
-# ==============================
-###
+### Inventory Controller ###
 
-# Get All Inventory (Admin/Staff only)
-GET http://localhost:3000/inventory HTTP/1.1
+### Get All Inventory (Admin/Staff only)
+GET {{baseUrl}}/inventory HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-
-# Get Inventory by ID (Admin/Staff only)
-GET http://localhost:3000/inventory/1 HTTP/1.1
+### Get Inventory by ID (Admin/Staff only)
+GET {{baseUrl}}/inventory/{{inventoryId}} HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-
-# Create Inventory (Admin/Staff only)
-# Note: Inventory is usually created with a new product. This is for manual adjustments.
-POST http://localhost:3000/inventory HTTP/1.1
+### Create Inventory (Admin/Staff only)
+POST {{baseUrl}}/inventory HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
@@ -253,10 +191,8 @@ Authorization: Bearer {{adminToken}}
   "stock_quantity": 1000
 }
 
-###
-
-# Update Inventory (Admin/Staff only)
-PATCH http://localhost:3000/inventory/1 HTTP/1.1
+### Update Inventory (Admin/Staff only)
+PATCH {{baseUrl}}/inventory/{{inventoryId}} HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
@@ -264,39 +200,26 @@ Authorization: Bearer {{adminToken}}
   "stock_quantity": 99
 }
 
-###
-
-# Delete Inventory (Admin only)
-DELETE http://localhost:3000/inventory/1 HTTP/1.1
+### Delete Inventory (Admin only)
+DELETE {{baseUrl}}/inventory/{{inventoryId}} HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-# ==============================
-#         Cart Controller
-# ==============================
-###
+### Cart Controller ###
 
-# Get current user's cart
-GET http://localhost:3000/cart HTTP/1.1
+### Get current user's cart
+GET {{baseUrl}}/cart HTTP/1.1
 Authorization: Bearer {{customerToken}}
 
-###
-
-# Get All Carts (Admin only)
-GET http://localhost:3000/cart HTTP/1.1
+### Get All Carts (Admin only)
+GET {{baseUrl}}/cart HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-
-# Get Cart by ID (Owner or Admin/Staff)
-GET http://localhost:3000/cart/1 HTTP/1.1
+### Get Cart by ID (Owner or Admin/Staff)
+GET {{baseUrl}}/cart/{{cartId}} HTTP/1.1
 Authorization: Bearer {{customerToken}}
 
-###
-
-# Create Cart (Authenticated users)
-# Note: Carts are created for users automatically. This is for manual creation if needed.
-POST http://localhost:3000/cart HTTP/1.1
+### Create Cart (Authenticated users)
+POST {{baseUrl}}/cart HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{customerToken}}
 
@@ -304,20 +227,14 @@ Authorization: Bearer {{customerToken}}
   "user_id": 3
 }
 
-###
-
-# Delete Cart (Admin only)
-DELETE http://localhost:3000/cart/1 HTTP/1.1
+### Delete Cart (Admin only)
+DELETE {{baseUrl}}/cart/{{cartId}} HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-# ==============================
-#      Cart Items Controller
-# ==============================
-###
+### Cart Items Controller ###
 
-# Add Item to Cart (Owner or Admin/Staff)
-POST http://localhost:3000/cart-items HTTP/1.1
+### Add Item to Cart (Owner or Admin/Staff)
+POST {{baseUrl}}/cart-items HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{customerToken}}
 
@@ -327,10 +244,8 @@ Authorization: Bearer {{customerToken}}
   "quantity": 1
 }
 
-###
-
-# Update Cart Item Quantity (Owner or Admin/Staff)
-PATCH http://localhost:3000/cart-items/1 HTTP/1.1
+### Update Cart Item Quantity (Owner or Admin/Staff)
+PATCH {{baseUrl}}/cart-items/{{cartItemId}} HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{customerToken}}
 
@@ -338,38 +253,26 @@ Authorization: Bearer {{customerToken}}
   "quantity": 2
 }
 
-###
-
-# Remove Item from Cart (Owner or Admin/Staff)
-DELETE http://localhost:3000/cart-items/2 HTTP/1.1
+### Remove Item from Cart (Owner or Admin/Staff)
+DELETE {{baseUrl}}/cart-items/2 HTTP/1.1
 Authorization: Bearer {{customerToken}}
 
-###
-# ==============================
-#        Orders Controller
-# ==============================
-###
+### Orders Controller ###
 
-# Get User's Order History
-GET http://localhost:3000/orders HTTP/1.1
+### Get User's Order History
+GET {{baseUrl}}/orders HTTP/1.1
 Authorization: Bearer {{customerToken}}
 
-###
-
-# Get All Orders (Admin/Staff only)
-GET http://localhost:3000/orders HTTP/1.1
+### Get All Orders (Admin/Staff only)
+GET {{baseUrl}}/orders HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-
-# Get Order by ID (Owner or Admin/Staff)
-GET http://localhost:3000/orders/1 HTTP/1.1
+### Get Order by ID (Owner or Admin/Staff)
+GET {{baseUrl}}/orders/{{orderId}} HTTP/1.1
 Authorization: Bearer {{customerToken}}
 
-###
-
-# Create Order from Cart (Authenticated users)
-POST http://localhost:3000/orders HTTP/1.1
+### Create Order from Cart (Authenticated users)
+POST {{baseUrl}}/orders HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{customerToken}}
 
@@ -377,10 +280,8 @@ Authorization: Bearer {{customerToken}}
   "shipping_address": "123 Maple Street, Anytown, USA"
 }
 
-###
-
-# Update Order Status (Admin/Staff only)
-PATCH http://localhost:3000/orders/1 HTTP/1.1
+### Update Order Status (Admin/Staff only)
+PATCH {{baseUrl}}/orders/{{orderId}} HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
@@ -388,59 +289,41 @@ Authorization: Bearer {{adminToken}}
   "status": "shipped"
 }
 
-###
-
-# Delete Order (Admin only)
-DELETE http://localhost:3000/orders/1 HTTP/1.1
+### Delete Order (Admin only)
+DELETE {{baseUrl}}/orders/{{orderId}} HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-# ==============================
-#    Transaction Logs Controller
-# ==============================
-###
+### Transaction Logs Controller ###
 
-# Get All Transaction Logs (Admin only)
-GET http://localhost:3000/transaction-logs HTTP/1.1
+### Get All Transaction Logs (Admin only)
+GET {{baseUrl}}/transaction-logs HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-
-# Get Transaction Log by ID (Admin only)
-GET http://localhost:3000/transaction-logs/1 HTTP/1.1
+### Get Transaction Log by ID (Admin only)
+GET {{baseUrl}}/transaction-logs/{{transactionLogId}} HTTP/1.1
 Authorization: Bearer {{adminToken}}
 
-###
-# ==============================
-#      Currencies Controller
-# ==============================
-###
+### Currencies Controller ###
 
-# Get All Currencies
-GET http://localhost:3000/currencies HTTP/1.1
+### Get All Currencies
+GET {{baseUrl}}/currencies HTTP/1.1
 
-###
+### Get Currency by ID
+GET {{baseUrl}}/currencies/{{currencyId}} HTTP/1.1
 
-# Get Currency by ID
-GET http://localhost:3000/currencies/1 HTTP/1.1
-
-###
-
-# Create Currency (Admin only)
-POST http://localhost:3000/currencies HTTP/1.1
+### Create Currency (Admin only)
+POST {{baseUrl}}/currencies HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
 {
   "currency_code": "JPY",
-  "symbol": "¥",
-  "exchange_rate_to_usd": 0.0068
+  "exchange_rate_to_usd": 0.0068,
+  "symbol": "¥"
 }
 
-###
-
-# Update Currency (Admin only)
-PATCH http://localhost:3000/currencies/1 HTTP/1.1
+### Update Currency (Admin only)
+PATCH {{baseUrl}}/currencies/{{currencyId}} HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
 
@@ -448,8 +331,6 @@ Authorization: Bearer {{adminToken}}
   "exchange_rate_to_usd": 0.018
 }
 
-###
-
-# Delete Currency (Admin only)
-DELETE http://localhost:3000/currencies/3 HTTP/1.1
+### Delete Currency (Admin only)
+DELETE {{baseUrl}}/currencies/3 HTTP/1.1
 Authorization: Bearer {{adminToken}}
