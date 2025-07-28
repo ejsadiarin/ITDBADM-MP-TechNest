@@ -37,7 +37,7 @@ Content-Type: application/json
 }
 
 ### Login User (admin)
-@name loginAdmin
+### @name loginAdmin
 POST {{baseUrl}}/auth/login HTTP/1.1
 Content-Type: application/json
 
@@ -48,7 +48,7 @@ Content-Type: application/json
 @adminToken = {{loginAdmin.response.body.accessToken}}
 
 ### Login User (customer)
-@name loginCustomer
+### @name loginCustomer
 POST {{baseUrl}}/auth/login HTTP/1.1
 Content-Type: application/json
 

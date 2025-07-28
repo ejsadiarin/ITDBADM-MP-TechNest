@@ -38,8 +38,40 @@ export class ProductsService {
     }
   }
 
-  async findAll(): Promise<Product[]> {
-    return await this.dataSource.query('SELECT * FROM products');
+  async findAll(query: any): Promise<Product[]> {
+    const { search, category, brand, minPrice, maxPrice, sortBy, order } =
+      query;
+    let queryBuilder =
+      'SELECT p.*, c.name as category_name FROM products p JOIN categories c ON p.category_id = c.category_id WHERE 1=1';
+
+    const params: any[] = [];
+
+    if (search) {
+      queryBuilder += ' AND (p.name LIKE ? OR p.description LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`);
+    }
+    if (category) {
+      queryBuilder += ' AND c.name = ?';
+      params.push(category);
+    }
+    if (brand) {
+      queryBuilder += ' AND p.brand = ?';
+      params.push(brand);
+    }
+    if (minPrice) {
+      queryBuilder += ' AND p.price >= ?';
+      params.push(minPrice);
+    }
+    if (maxPrice) {
+      queryBuilder += ' AND p.price <= ?';
+      params.push(maxPrice);
+    }
+    if (sortBy) {
+      const sortOrder = order?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+      queryBuilder += ` ORDER BY p.${sortBy} ${sortOrder}`;
+    }
+
+    return await this.dataSource.query(queryBuilder, params);
   }
 
   async findOne(id: number): Promise<Product> {

@@ -23,7 +23,7 @@ export class AuthService {
   ) {}
 
   async register(registerAuthDto: RegisterAuthDto): Promise<User> {
-    const { username, email } = registerAuthDto;
+    const { username, email, role } = registerAuthDto;
 
     const existingUser = await this.usersRepository.findOne({
       where: [{ username }, { email }],
@@ -35,7 +35,7 @@ export class AuthService {
       );
     }
 
-    return this.usersService.create(registerAuthDto);
+    return this.usersService.create({ ...registerAuthDto, role });
   }
 
   async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
@@ -51,7 +51,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { sub: user.user_id, username: user.username };
+    const payload = {
+      sub: user.user_id,
+      username: user.username,
+      role: user.role,
+    };
     const accessToken = this.jwtService.sign(payload);
 
     return { accessToken };
@@ -67,3 +71,4 @@ export class AuthService {
     return user;
   }
 }
+

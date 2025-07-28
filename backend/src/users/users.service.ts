@@ -19,7 +19,7 @@ export class UsersService {
     const newUser = this.usersRepository.create({
       ...createUserDto,
       password_hash: hashedPassword,
-      role: UserRole.CUSTOMER, // Default role
+      role: createUserDto.role, // Set role from DTO
     });
 
     return this.usersRepository.save(newUser);
