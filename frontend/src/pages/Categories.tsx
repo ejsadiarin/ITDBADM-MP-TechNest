@@ -15,7 +15,7 @@ const Categories: React.FC = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch('/categories')
+    fetch('/api/categories')
       .then(async (res) => {
         if (!res.ok) throw new Error('Network response was not ok');
         const text = await res.text();
@@ -43,7 +43,7 @@ const Categories: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingId) {
-      fetch(`/categories/${editingId}`, {
+      fetch(`/api/categories/${editingId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -56,7 +56,7 @@ const Categories: React.FC = () => {
         })
         .catch(() => setError('Failed to update category'));
     } else {
-      fetch('/categories', {
+      fetch('/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -76,7 +76,7 @@ const Categories: React.FC = () => {
   };
 
   const handleDelete = (id: number) => {
-    fetch(`/categories/${id}`, { method: 'DELETE' })
+    fetch(`/api/categories/${id}`, { method: 'DELETE' })
       .then((res) => {
         if (res.ok) {
           setCategories((prev) => prev.filter((cat) => cat.id !== id));
@@ -87,31 +87,31 @@ const Categories: React.FC = () => {
       .catch(() => setError('Failed to delete category'));
   };
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: 40, color: '#00c6ff', fontWeight: 600 }}>Loading categories...</div>;
+  if (loading) return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading categories...</div>;
   if (error) return <Notification message={error} type="error" />;
 
   return (
-    <div style={{ maxWidth: 700, margin: '2rem auto', padding: 32, background: '#181f2a', borderRadius: 16, color: '#fff', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: 28, fontWeight: 700, letterSpacing: 1, color: '#00c6ff' }}>Categories</h2>
-      <form onSubmit={handleSubmit} style={{ marginBottom: 36, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+    <div className="max-w-3xl mx-auto p-8 bg-gray-800 rounded-lg shadow-lg text-white">
+      <h2 className="text-3xl font-bold text-center text-cyan-400 mb-8">Categories</h2>
+      <form onSubmit={handleSubmit} className="mb-8 flex flex-wrap items-center justify-center gap-4">
         <input
           name="name"
           value={form.name}
           onChange={handleChange}
           placeholder="Category Name"
           required
-          style={{ width: 220, padding: 10, borderRadius: 8, border: '1px solid #333', background: '#232b3b', color: '#fff', fontSize: 16 }}
+          className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
         />
         <input
           name="description"
           value={form.description}
           onChange={handleChange}
           placeholder="Description (optional)"
-          style={{ width: 220, padding: 10, borderRadius: 8, border: '1px solid #333', background: '#232b3b', color: '#fff', fontSize: 16 }}
+          className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
         />
         <button
           type="submit"
-          style={{ background: 'linear-gradient(90deg, #00c6ff, #0072ff)', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 22px', cursor: 'pointer', fontWeight: 600, fontSize: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
+          className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
         >
           {editingId ? 'Update' : 'Add'}
         </button>
@@ -119,29 +119,29 @@ const Categories: React.FC = () => {
           <button
             type="button"
             onClick={() => { setEditingId(null); setForm({ name: '', description: '' }); }}
-            style={{ background: '#444', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 22px', cursor: 'pointer', fontWeight: 600, fontSize: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
+            className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
           >
             Cancel
           </button>
         )}
       </form>
-      <ul style={{ listStyle: 'none', padding: 0 }}>
+      <ul className="list-none p-0">
         {categories.map((cat) => (
-          <li key={cat.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#232b3b', marginBottom: 14, padding: 18, borderRadius: 10, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+          <li key={cat.id} className="flex justify-between items-center bg-gray-700 mb-4 p-4 rounded-lg shadow-md">
             <div>
-              <div style={{ fontWeight: 600, fontSize: 17 }}>{cat.name}</div>
-              <div style={{ fontSize: 15, color: '#b0b8c1' }}>{cat.description}</div>
+              <div className="font-semibold text-lg">{cat.name}</div>
+              <div className="text-gray-400 text-base">{cat.description}</div>
             </div>
             <div>
               <button
                 onClick={() => handleEdit(cat)}
-                style={{ marginRight: 8, background: '#0072ff', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', fontWeight: 600, fontSize: 15, boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 mr-2"
               >
                 Edit
               </button>
               <button
                 onClick={() => handleDelete(cat.id)}
-                style={{ background: '#ff4d4f', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 18px', cursor: 'pointer', fontWeight: 600, fontSize: 15, boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
               >
                 Delete
               </button>

@@ -30,43 +30,45 @@ const TransactionLogs: React.FC = () => {
       });
   }, []);
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: 40, color: '#00c6ff', fontWeight: 600 }}>Loading transaction logs...</div>;
+  if (loading) return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading transaction logs...</div>;
   if (error) return <Notification message={error} type="error" />;
 
   return (
-    <div style={{ maxWidth: 900, margin: '2rem auto', padding: 32, background: '#181f2a', borderRadius: 16, color: '#fff', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: 28, fontWeight: 700, letterSpacing: 1, color: '#00c6ff' }}>Transaction Logs</h2>
+    <div className="max-w-5xl mx-auto p-8 bg-gray-800 rounded-lg shadow-lg text-white">
+      <h2 className="text-3xl font-bold text-center text-cyan-400 mb-8">Transaction Logs</h2>
       {logs.length === 0 ? (
-        <div style={{ textAlign: 'center', color: '#aaa', fontSize: 18 }}>No transaction logs.</div>
+        <div className="text-center text-gray-500 text-lg">No transaction logs.</div>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse', background: '#232b3b', borderRadius: 10 }}>
-          <thead>
-            <tr style={{ color: '#00c6ff', fontWeight: 600 }}>
-              <th style={{ padding: 12 }}>Log ID</th>
-              <th style={{ padding: 12 }}>User ID</th>
-              <th style={{ padding: 12 }}>Action Type</th>
-              <th style={{ padding: 12 }}>Table</th>
-              <th style={{ padding: 12 }}>Record ID</th>
-              <th style={{ padding: 12 }}>Old Value</th>
-              <th style={{ padding: 12 }}>New Value</th>
-              <th style={{ padding: 12 }}>Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
-            {logs.map(log => (
-              <tr key={log.log_id} style={{ borderBottom: '1px solid #222' }}>
-                <td style={{ padding: 12 }}>{log.log_id}</td>
-                <td style={{ padding: 12 }}>{log.user_id ?? 'N/A'}</td>
-                <td style={{ padding: 12 }}>{log.action_type}</td>
-                <td style={{ padding: 12 }}>{log.table_name}</td>
-                <td style={{ padding: 12 }}>{log.record_id}</td>
-                <td style={{ padding: 12 }}>{log.old_value ?? '-'}</td>
-                <td style={{ padding: 12 }}>{log.new_value ?? '-'}</td>
-                <td style={{ padding: 12 }}>{new Date(log.action_timestamp).toLocaleString()}</td>
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse bg-gray-700 rounded-lg overflow-hidden">
+            <thead>
+              <tr className="bg-gray-600 text-cyan-400 font-semibold">
+                <th className="p-3 text-left">Log ID</th>
+                <th className="p-3 text-left">User ID</th>
+                <th className="p-3 text-left">Action Type</th>
+                <th className="p-3 text-left">Table</th>
+                <th className="p-3 text-left">Record ID</th>
+                <th className="p-3 text-left">Old Value</th>
+                <th className="p-3 text-left">New Value</th>
+                <th className="p-3 text-left">Timestamp</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {logs.map(log => (
+                <tr key={log.log_id} className="border-b border-gray-600 last:border-b-0">
+                  <td className="p-3">{log.log_id}</td>
+                  <td className="p-3">{log.user_id ?? 'N/A'}</td>
+                  <td className="p-3">{log.action_type}</td>
+                  <td className="p-3">{log.table_name}</td>
+                  <td className="p-3">{log.record_id}</td>
+                  <td className="p-3">{log.old_value ?? '-'}</td>
+                  <td className="p-3">{log.new_value ?? '-'}</td>
+                  <td className="p-3">{new Date(log.action_timestamp).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

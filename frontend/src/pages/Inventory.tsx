@@ -26,31 +26,31 @@ const Inventory: React.FC = () => {
       });
   }, []);
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: 40, color: '#00c6ff', fontWeight: 600 }}>Loading inventory...</div>;
+  if (loading) return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading inventory...</div>;
   if (error) return <Notification message={error} type="error" />;
 
   return (
-    <div style={{ maxWidth: 700, margin: '2rem auto', padding: 32, background: '#181f2a', borderRadius: 16, color: '#fff', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: 28, fontWeight: 700, letterSpacing: 1, color: '#00c6ff' }}>Inventory</h2>
+    <div className="max-w-3xl mx-auto p-8 bg-gray-800 rounded-lg shadow-lg text-white">
+      <h2 className="text-3xl font-bold text-center text-cyan-400 mb-8">Inventory</h2>
       {items.length === 0 ? (
-        <div style={{ textAlign: 'center', color: '#aaa', fontSize: 18 }}>No inventory items.</div>
+        <div className="text-center text-gray-500 text-lg">No inventory items.</div>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse', background: '#232b3b', borderRadius: 10 }}>
+        <table className="w-full border-collapse bg-gray-700 rounded-lg overflow-hidden">
           <thead>
-            <tr style={{ color: '#00c6ff', fontWeight: 600 }}>
-              <th style={{ padding: 12 }}>Inventory ID</th>
-              <th style={{ padding: 12 }}>Product ID</th>
-              <th style={{ padding: 12 }}>Stock Quantity</th>
-              <th style={{ padding: 12 }}>Last Updated</th>
+            <tr className="bg-gray-600 text-cyan-400 font-semibold">
+              <th className="p-3 text-left">Inventory ID</th>
+              <th className="p-3 text-left">Product ID</th>
+              <th className="p-3 text-left">Stock Quantity</th>
+              <th className="p-3 text-left">Last Updated</th>
             </tr>
           </thead>
           <tbody>
             {items.map(item => (
-              <tr key={item.inventory_id} style={{ borderBottom: '1px solid #222' }}>
-                <td style={{ padding: 12 }}>{item.inventory_id}</td>
-                <td style={{ padding: 12 }}>{item.product_id}</td>
-                <td style={{ padding: 12 }}>{item.stock_quantity}</td>
-                <td style={{ padding: 12 }}>{new Date(item.last_updated).toLocaleString()}</td>
+              <tr key={item.inventory_id} className="border-b border-gray-600 last:border-b-0">
+                <td className="p-3">{item.inventory_id}</td>
+                <td className="p-3">{item.product_id}</td>
+                <td className="p-3">{item.stock_quantity}</td>
+                <td className="p-3">{new Date(item.last_updated).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>

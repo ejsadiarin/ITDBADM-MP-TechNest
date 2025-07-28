@@ -21,39 +21,24 @@ useEffect(() => {
 }, []);
 
   return (
-    <div style={{ width: '100%' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Your Cart</h1>
+    <div className="w-full p-4">
+      <h1 className="text-3xl font-bold text-center text-cyan-400 mb-8">Your Cart</h1>
       {loading ? (
-        <div style={{ textAlign: 'center', color: '#00d8ff' }}>Loading cart...</div>
+        <div className="text-center text-gray-400">Loading cart...</div>
       ) : cart.length === 0 ? (
-        <div style={{ textAlign: 'center', color: '#b0b3b8' }}>Your cart is empty.</div>
+        <div className="text-center text-gray-500">Your cart is empty.</div>
       ) : (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.5rem',
-          maxWidth: 600,
-          margin: '0 auto',
-        }}>
+        <div className="flex flex-col gap-4 max-w-2xl mx-auto">
           {cart.map(item => (
-            <div key={item.id} style={{
-              background: 'linear-gradient(135deg, #23272f 80%, #1de9b6 180%)',
-              borderRadius: 18,
-              boxShadow: '0 4px 24px #00d8ff22',
-              padding: '1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              border: '1.5px solid #00d8ff33',
-              justifyContent: 'space-between',
-            }}>
-              <div style={{ color: '#fff', fontWeight: 600, fontSize: '1.1rem' }}>
+            <div key={item.id} className="bg-gray-800 rounded-lg shadow-md p-4 flex items-center justify-between border border-gray-700">
+              <div className="text-white font-semibold text-lg">
                 Product ID: {item.product_id}
               </div>
-              <div style={{ color: '#b0b3b8', fontSize: '1rem' }}>
+              <div className="text-gray-400 text-base">
                 Quantity: {item.quantity}
               </div>
               <button
-                style={{ minWidth: 100 }}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
                 onClick={async () => {
                   await fetch(`/api/cart/${item.id}`, { method: 'DELETE' });
                   setCart(cart.filter(ci => ci.id !== item.id));

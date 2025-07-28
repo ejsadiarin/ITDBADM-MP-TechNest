@@ -11,87 +11,113 @@ interface Product {
   currency_id?: number;
 }
 
+interface Category {
+  category_id: number;
+  name: string;
+}
+
 const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    search: '',
+    category: '',
+    brand: '',
+    minPrice: '',
+    maxPrice: '',
+    sortBy: 'name',
+    order: 'asc',
+  });
 
-useEffect(() => {
-  fetch('/api/products')
-    .then(res => res.json())
-    .then(data => {
-      setProducts(Array.isArray(data) ? data : []);
-      setLoading(false);
-    });
-}, []);
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setCategories(data);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    const fetchProducts = () => {
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (filters.search) params.append('search', filters.search);
+      if (filters.category) params.append('category', filters.category);
+      if (filters.brand) params.append('brand', filters.brand);
+      if (filters.minPrice) params.append('minPrice', filters.minPrice);
+      if (filters.maxPrice) params.append('maxPrice', filters.maxPrice);
+      if (filters.sortBy) params.append('sortBy', filters.sortBy);
+      if (filters.order) params.append('order', filters.order);
+
+      fetch(`/api/products?${params.toString()}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setProducts(Array.isArray(data) ? data : []);
+          setLoading(false);
+        })
+        .catch(() => {
+          setProducts([]);
+          setLoading(false);
+        });
+    };
+
+    fetchProducts();
+  }, [filters]);
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [name]: value,
+    }));
+  };
 
   return (
-    <div style={{ width: '100%', background: 'linear-gradient(135deg, #181f2a 60%, #00c6ff 180%)', minHeight: '100vh', padding: '2rem 0' }}>
-      <h1 style={{ textAlign: 'center', marginBottom: '2.5rem', color: '#00c6ff', fontWeight: 800, letterSpacing: 1 }}>Latest Tech Products</h1>
+    <div className="bg-gray-900 min-h-screen p-4 sm:p-6 md:p-8">
+      <h1 className="text-3xl sm:text-4xl font-bold text-center text-cyan-400 mb-8">Latest Tech Products</h1>
+
+      <div className="max-w-7xl mx-auto mb-8 p-4 bg-gray-800 rounded-lg shadow-md flex flex-wrap items-center justify-center gap-4">
+        <input type="text" name="search" placeholder="Search products..." value={filters.search} onChange={handleFilterChange} className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+        <select name="category" value={filters.category} onChange={handleFilterChange} className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
+          <option value="">All Categories</option>
+          {categories.map((cat) => (
+            <option key={cat.category_id} value={cat.name}>{cat.name}</option>
+          ))}
+        </select>
+        <input type="text" name="brand" placeholder="Brand" value={filters.brand} onChange={handleFilterChange} className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+        <input type="number" name="minPrice" placeholder="Min Price" value={filters.minPrice} onChange={handleFilterChange} className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+        <input type="number" name="maxPrice" placeholder="Max Price" value={filters.maxPrice} onChange={handleFilterChange} className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+        <select name="sortBy" value={filters.sortBy} onChange={handleFilterChange} className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
+          <option value="name">Name</option>
+          <option value="price">Price</option>
+        </select>
+        <select name="order" value={filters.order} onChange={handleFilterChange} className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
+
       {loading ? (
-        <div style={{ textAlign: 'center', color: '#00d8ff', fontWeight: 600, fontSize: 20 }}>Loading products...</div>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-cyan-500"></div>
+        </div>
       ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
-          gap: '2.2rem',
-          maxWidth: 1200,
-          margin: '0 auto',
-        }}>
-          {products.map(product => (
-            <div
-              key={product.product_id}
-              style={{
-                background: 'linear-gradient(135deg, #23272f 80%, #1de9b6 180%)',
-                borderRadius: 20,
-                boxShadow: '0 6px 32px #00c6ff22',
-                padding: '2.2rem 1.5rem 1.5rem 1.5rem',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                border: '1.5px solid #00c6ff33',
-                minHeight: 370,
-                transition: 'transform 0.18s, box-shadow 0.18s',
-                cursor: 'pointer',
-                position: 'relative',
-              }}
-              onMouseOver={e => {
-                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-6px) scale(1.03)';
-                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 12px 36px #00c6ff44';
-              }}
-              onMouseOut={e => {
-                (e.currentTarget as HTMLDivElement).style.transform = '';
-                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 6px 32px #00c6ff22';
-              }}
-            >
-              {product.image_url && (
-                <img src={product.image_url} alt={product.name} style={{ width: 130, height: 130, objectFit: 'cover', borderRadius: 14, marginBottom: 18, background: '#181a20', boxShadow: '0 2px 12px #00c6ff22' }} />
-              )}
-              <h2 style={{ color: '#00c6ff', margin: '0 0 0.5rem 0', fontSize: '1.35rem', textAlign: 'center', fontWeight: 700 }}>{product.name}</h2>
-              <div style={{ color: '#b0b3b8', fontSize: '1.05rem', marginBottom: 8, textAlign: 'center', fontWeight: 500 }}>{product.brand}</div>
-              <div style={{ color: '#fff', fontWeight: 700, fontSize: '1.15rem', marginBottom: 8 }}>
-                ₱{Number(product.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              </div>
-              <div style={{ color: '#b0b3b8', fontSize: '0.99rem', marginBottom: 14, textAlign: 'center', minHeight: 40 }}>{product.description}</div>
-              <button
-                style={{
-                  marginTop: 'auto',
-                  width: '100%',
-                  background: 'linear-gradient(90deg, #00c6ff, #0072ff)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 10,
-                  padding: '12px 0',
-                  fontWeight: 700,
-                  fontSize: 16,
-                  boxShadow: '0 2px 8px #00c6ff22',
-                  cursor: 'pointer',
-                  transition: 'background 0.18s',
-                }}
-              >
-                Add to Cart
-              </button>
-              <div style={{ position: 'absolute', top: 18, right: 18, background: '#00c6ff', color: '#fff', borderRadius: 8, padding: '2px 10px', fontSize: 13, fontWeight: 600, letterSpacing: 0.5 }}>
-                #{product.product_id}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <div key={product.product_id} className="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
+              {product.image_url && <img src={product.image_url} alt={product.name} className="w-full h-48 object-cover" />}
+              <div className="p-4">
+                <h2 className="text-xl font-bold text-cyan-400">{product.name}</h2>
+                <p className="text-gray-400 mt-1">{product.brand}</p>
+                <p className="text-gray-300 mt-2">{product.description}</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <p className="text-lg font-semibold text-white">${product.price.toLocaleString()}</p>
+                  <button className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">Add to Cart</button>
+                </div>
               </div>
             </div>
           ))}

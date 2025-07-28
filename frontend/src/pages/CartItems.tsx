@@ -38,27 +38,26 @@ const CartItems: React.FC = () => {
       .catch(() => setError('Failed to remove item'));
   };
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: 40, color: '#00c6ff', fontWeight: 600 }}>Loading cart items...</div>;
+  if (loading) return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading cart items...</div>;
 
-  // Consistent notification for errors
   if (error) return <Notification message={error} type="error" />;
 
   return (
-    <div style={{ maxWidth: 600, margin: '2rem auto', padding: 32, background: '#181f2a', borderRadius: 16, color: '#fff', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: 28, fontWeight: 700, letterSpacing: 1, color: '#00c6ff' }}>Cart Items</h2>
+    <div className="max-w-2xl mx-auto p-8 bg-gray-800 rounded-lg shadow-lg text-white">
+      <h2 className="text-3xl font-bold text-center text-cyan-400 mb-8">Cart Items</h2>
       {cartItems.length === 0 ? (
-        <div style={{ textAlign: 'center', color: '#aaa', fontSize: 18 }}>No items in cart.</div>
+        <div className="text-center text-gray-500 text-lg">No items in cart.</div>
       ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul className="list-none p-0">
           {cartItems.map((item) => (
-            <li key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#232b3b', marginBottom: 14, padding: 18, borderRadius: 10, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            <li key={item.id} className="flex justify-between items-center bg-gray-700 mb-4 p-4 rounded-lg shadow-md">
               <div>
-                <div style={{ fontWeight: 600, fontSize: 17 }}>Product ID: <span style={{ color: '#00c6ff' }}>{item.productId}</span></div>
-                <div style={{ fontSize: 15, color: '#b0b8c1' }}>Quantity: {item.quantity}</div>
+                <div className="font-semibold text-lg">Product ID: <span className="text-cyan-400">{item.productId}</span></div>
+                <div className="text-gray-400 text-base">Quantity: {item.quantity}</div>
               </div>
               <button
                 onClick={() => handleRemove(item.id)}
-                style={{ background: 'linear-gradient(90deg, #00c6ff, #0072ff)', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 20px', cursor: 'pointer', fontWeight: 600, fontSize: 15, boxShadow: '0 2px 8px rgba(0,0,0,0.10)' }}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
               >
                 Remove
               </button>

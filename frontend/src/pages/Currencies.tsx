@@ -26,31 +26,31 @@ const Currencies: React.FC = () => {
       });
   }, []);
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: 40, color: '#00c6ff', fontWeight: 600 }}>Loading currencies...</div>;
+  if (loading) return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading currencies...</div>;
   if (error) return <Notification message={error} type="error" />;
 
   return (
-    <div style={{ maxWidth: 700, margin: '2rem auto', padding: 32, background: '#181f2a', borderRadius: 16, color: '#fff', boxShadow: '0 4px 24px rgba(0,0,0,0.12)' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: 28, fontWeight: 700, letterSpacing: 1, color: '#00c6ff' }}>Currencies</h2>
+    <div className="max-w-3xl mx-auto p-8 bg-gray-800 rounded-lg shadow-lg text-white">
+      <h2 className="text-3xl font-bold text-center text-cyan-400 mb-8">Currencies</h2>
       {currencies.length === 0 ? (
-        <div style={{ textAlign: 'center', color: '#aaa', fontSize: 18 }}>No currencies found.</div>
+        <div className="text-center text-gray-500 text-lg">No currencies found.</div>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse', background: '#232b3b', borderRadius: 10 }}>
+        <table className="w-full border-collapse bg-gray-700 rounded-lg overflow-hidden">
           <thead>
-            <tr style={{ color: '#00c6ff', fontWeight: 600 }}>
-              <th style={{ padding: 12 }}>Currency ID</th>
-              <th style={{ padding: 12 }}>Code</th>
-              <th style={{ padding: 12 }}>Symbol</th>
-              <th style={{ padding: 12 }}>Exchange Rate to USD</th>
+            <tr className="bg-gray-600 text-cyan-400 font-semibold">
+              <th className="p-3 text-left">Currency ID</th>
+              <th className="p-3 text-left">Code</th>
+              <th className="p-3 text-left">Symbol</th>
+              <th className="p-3 text-left">Exchange Rate to USD</th>
             </tr>
           </thead>
           <tbody>
             {currencies.map(currency => (
-              <tr key={currency.currency_id} style={{ borderBottom: '1px solid #222' }}>
-                <td style={{ padding: 12 }}>{currency.currency_id}</td>
-                <td style={{ padding: 12 }}>{currency.currency_code}</td>
-                <td style={{ padding: 12 }}>{currency.symbol}</td>
-                <td style={{ padding: 12 }}>{currency.exchange_rate_to_usd}</td>
+              <tr key={currency.currency_id} className="border-b border-gray-600 last:border-b-0">
+                <td className="p-3">{currency.currency_id}</td>
+                <td className="p-3">{currency.currency_code}</td>
+                <td className="p-3">{currency.symbol}</td>
+                <td className="p-3">{currency.exchange_rate_to_usd}</td>
               </tr>
             ))}
           </tbody>
