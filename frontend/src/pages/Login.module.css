@@ -1,0 +1,122 @@
+.login-form select {
+  width: 100%;
+  padding: 1.05rem 1.2rem;
+  border-radius: 14px;
+  border: 1.5px solid #00d8ff33;
+  background: #181a20;
+  color: #fff;
+  font-size: 1.12rem;
+  box-shadow: 0 2px 12px #00d8ff11;
+  margin-bottom: 0.2rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  appearance: none;
+}
+.login-form select:focus {
+  border: 1.5px solid #00d8ff;
+  box-shadow: 0 0 0 2px #00d8ff33, 0 2px 12px #00d8ff22;
+}
+/* Background wrapper for centering */
+.login-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 60% 40%, #23272f 60%, #181a20 100%);
+}
+.login-container {
+  max-width: 420px;
+  width: 100%;
+  background: linear-gradient(135deg, #23272f 80%, #1de9b6 180%);
+  border-radius: 28px;
+  box-shadow: 0 12px 48px 0 #00d8ff22, 0 2px 8px #0002;
+  padding: 3.2rem 2.7rem 2.7rem 2.7rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.7rem;
+  position: relative;
+  z-index: 2;
+  border: 1.5px solid #00d8ff33;
+  backdrop-filter: blur(1.5px);
+}
+
+.login-title {
+  color: #00d8ff;
+  font-size: 2.4rem;
+  margin-bottom: 2.2rem;
+  font-weight: 900;
+  letter-spacing: 2.5px;
+  text-align: center;
+  text-shadow: 0 2px 24px #00d8ff44;
+}
+
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.login-form > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.login-form label {
+  color: #b0b3b8;
+  font-size: 1.08rem;
+  margin-bottom: 0.4rem;
+  align-self: flex-start;
+  margin-left: 0.2rem;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 1.05rem 1.2rem;
+  border-radius: 14px;
+  border: 1.5px solid #00d8ff33;
+  background: #181a20;
+  color: #fff;
+  font-size: 1.12rem;
+  box-shadow: 0 2px 12px #00d8ff11;
+  margin-bottom: 0.2rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+.login-form input:focus {
+  border: 1.5px solid #00d8ff;
+  box-shadow: 0 0 0 2px #00d8ff33, 0 2px 12px #00d8ff22;
+}
+
+
+.login-form button {
+  margin-top: 0.7rem;
+  width: 100%;
+  background: linear-gradient(90deg, #00d8ff 60%, #1de9b6 100%);
+  color: #23272f;
+  font-weight: 900;
+  font-size: 1.22rem;
+  border: none;
+  border-radius: 14px;
+  padding: 1.15rem 0;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 16px #00d8ff22;
+  letter-spacing: 1px;
+}
+
+.login-form button:hover {
+  background: linear-gradient(90deg, #1de9b6 60%, #00d8ff 100%);
+  box-shadow: 0 6px 32px #1de9b633;
+}
+
+.login-hint {
+  color: #b0b3b8;
+  font-size: 1rem;
+  margin-top: 1.2rem;
+  text-align: center;
+}
