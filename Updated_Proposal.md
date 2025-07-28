@@ -500,28 +500,32 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
 5.  **`LogTransaction`**
     - **Purpose:** Logs payment activity for an order in the `transaction_logs` table.
     - **Parameters:**
+        - `p_user_id INT`: The ID of the user.
         - `p_order_id INT`: The ID of the order.
         - `p_payment_method VARCHAR(50)`: The payment method used.
         - `p_status VARCHAR(50)`: The status of the payment.
         - `p_amount DECIMAL(10,2)`: The amount of the transaction.
     ```sql
+    -- Logs payment activity for an order in the transaction_logs table
     DELIMITER $$
     CREATE PROCEDURE LogTransaction(
+        IN p_user_id INT,
         IN p_order_id INT,
         IN p_payment_method VARCHAR(50),
         IN p_status VARCHAR(50),
         IN p_amount DECIMAL(10,2)
     )
     BEGIN
-        INSERT INTO transaction_logs (action_type, table_name, record_id, new_value)
+        INSERT INTO transaction_logs (user_id, action_type, table_name, record_id, new_value)
         VALUES (
+            p_user_id,
             'PAYMENT_ATTEMPT',
             'orders',
             p_order_id,
             CONCAT('Method: ', p_payment_method, ', Status: ', p_status, ', Amount: ', p_amount)
         );
-    END$$ 
-    DELIMITER ;
+    END
+    $$ DELIMITER ;
     ```
 
 ## **6. ACID Transactions**
