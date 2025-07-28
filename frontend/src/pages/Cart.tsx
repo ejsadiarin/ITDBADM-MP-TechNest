@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import styles from './Login.module.css';
 
 interface CartItem {
   id: number;
@@ -12,14 +11,14 @@ const Cart: React.FC = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch('/api/cart')
-      .then(res => res.json())
-      .then(data => {
-        setCart(data);
-        setLoading(false);
-      });
-  }, []);
+useEffect(() => {
+  fetch('/api/cart')
+    .then(res => res.json())
+    .then(data => {
+      setCart(Array.isArray(data) ? data : []);
+      setLoading(false);
+    });
+}, []);
 
   return (
     <div style={{ width: '100%' }}>

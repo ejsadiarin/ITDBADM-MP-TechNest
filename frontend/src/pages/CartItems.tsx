@@ -17,7 +17,7 @@ const CartItems: React.FC = () => {
     fetch('/api/cart-items')
       .then((res) => res.json())
       .then((data) => {
-        setCartItems(data);
+        setCartItems(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch(() => {

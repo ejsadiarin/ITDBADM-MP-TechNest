@@ -14,6 +14,9 @@ const Navbar: React.FC = () => (
       <li><Link to="/cart-items">Cart Items</Link></li>
       <li><Link to="/categories">Categories</Link></li>
       <li><Link to="/order-items">Order Items</Link></li>
+      <li><Link to="/inventory">Inventory</Link></li>
+      <li><Link to="/transaction-logs">Transaction Logs</Link></li>
+      <li><Link to="/currencies">Currencies</Link></li>
     </ul>
   </nav>
 );
