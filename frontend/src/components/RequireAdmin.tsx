@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
-// Dummy admin check: replace with real auth logic
 const isAdmin = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   return user && user.role === 'admin';
