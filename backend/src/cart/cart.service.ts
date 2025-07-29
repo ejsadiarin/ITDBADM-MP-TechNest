@@ -59,7 +59,7 @@ export class CartService {
     }
 
     const cartItems = await this.dataSource.query(
-      'SELECT * FROM cart_items WHERE cart_id = ?',
+      'SELECT ci.*, p.name FROM cart_items ci JOIN products p ON ci.product_id = p.product_id WHERE ci.cart_id = ?',
       [cart.cart_id],
     );
 

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Home from './pages/Home';
@@ -39,12 +39,15 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; roles?: string[] }> 
   return <>{children}</>;
 };
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const { isLoggedIn, userRole, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading...</div>;
   }
+
+  const showLayout = isLoggedIn && location.pathname !== '/login' && location.pathname !== '/register';
 
   // Determine default route based on role
   const getDefaultRoute = () => {
@@ -55,42 +58,46 @@ const App: React.FC = () => {
   };
 
   return (
-    <Router>
-      <div className="bg-gray-900 text-white flex min-h-screen">
-        {isLoggedIn && <Sidebar />}
-        <div className={`flex-1 flex flex-col ${isLoggedIn ? 'ml-64' : 'ml-0 w-full'}`}>
-          {isLoggedIn && <Header />}
-          <main className="p-6 mt-16 flex-1">
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/" element={getDefaultRoute()} />
+    <div className="bg-gray-900 text-white flex min-h-screen">
+      {showLayout && <Sidebar />}
+      <div className={`flex-1 flex flex-col ${showLayout ? 'ml-64' : 'ml-0 w-full'}`}>
+        {showLayout && <Header />}
+        <main className={`p-6 flex-1 ${showLayout ? 'mt-16' : ''}`}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/" element={getDefaultRoute()} />
 
-              {/* Customer & All Authenticated Users */}
-              <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
-              <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
-              <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-              <Route path="/cart-items" element={<ProtectedRoute><CartItems /></ProtectedRoute>} />
-              <Route path="/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
-              <Route path="/order-items" element={<ProtectedRoute><OrderItems /></ProtectedRoute>} />
+            {/* Customer & All Authenticated Users */}
+            <Route path="/products" element={<ProtectedRoute roles={['customer']}><Products /></ProtectedRoute>} />
+            <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/cart-items" element={<ProtectedRoute><CartItems /></ProtectedRoute>} />
+            <Route path="/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
+            <Route path="/order-items" element={<ProtectedRoute><OrderItems /></ProtectedRoute>} />
 
-              {/* Staff and Admin */}
-              <Route path="/inventory" element={<ProtectedRoute roles={['staff', 'admin']}><Inventory /></ProtectedRoute>} />
-              <Route path="/staff" element={<ProtectedRoute roles={['staff', 'admin']}><StaffDashboard /></ProtectedRoute>} />
+            {/* Staff and Admin */}
+            <Route path="/inventory" element={<ProtectedRoute roles={['staff', 'admin']}><Inventory /></ProtectedRoute>} />
+            <Route path="/staff" element={<ProtectedRoute roles={['staff', 'admin']}><StaffDashboard /></ProtectedRoute>} />
 
-              {/* Admin Only */}
-              <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-              <Route path="/admin/users" element={<ProtectedRoute roles={['admin']}><UserManagement /></ProtectedRoute>} />
-              <Route path="/admin/products" element={<ProtectedRoute roles={['admin']}><ProductManagement /></ProtectedRoute>} />
-              <Route path="/transaction-logs" element={<ProtectedRoute roles={['admin']}><TransactionLogs /></ProtectedRoute>} />
-              <Route path="/currencies" element={<ProtectedRoute roles={['admin']}><Currencies /></ProtectedRoute>} />
-            </Routes>
-          </main>
-        </div>
+            {/* Admin Only */}
+            <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute roles={['admin']}><UserManagement /></ProtectedRoute>} />
+            <Route path="/admin/products" element={<ProtectedRoute roles={['admin']}><ProductManagement /></ProtectedRoute>} />
+            <Route path="/transaction-logs" element={<ProtectedRoute roles={['admin']}><TransactionLogs /></ProtectedRoute>} />
+            <Route path="/currencies" element={<ProtectedRoute roles={['admin']}><Currencies /></ProtectedRoute>} />
+          </Routes>
+        </main>
       </div>
-    </Router>
+    </div>
   );
-};
+}
+
+const App: React.FC = () => (
+  <Router>
+    <AppContent />
+  </Router>
+);
 
 export default App;

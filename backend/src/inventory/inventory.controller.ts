@@ -22,10 +22,7 @@ import { UserRole } from '../users/entities/user.entity';
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
-  @Post()
-  create(@Body() createInventoryDto: CreateInventoryDto) {
-    return this.inventoryService.create(createInventoryDto);
-  }
+  
 
   @Get()
   findAll() {

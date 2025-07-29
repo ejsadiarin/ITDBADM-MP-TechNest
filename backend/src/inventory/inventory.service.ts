@@ -33,7 +33,16 @@ export class InventoryService {
   }
 
   async findAll(): Promise<Inventory[]> {
-    return await this.dataSource.query('SELECT * FROM inventory');
+    return await this.dataSource.query(`
+      SELECT 
+        i.inventory_id, 
+        i.product_id, 
+        p.name as product_name, 
+        i.stock_quantity, 
+        i.last_updated
+      FROM inventory i
+      JOIN products p ON i.product_id = p.product_id
+    `);
   }
 
   async findOne(id: number): Promise<Inventory> {

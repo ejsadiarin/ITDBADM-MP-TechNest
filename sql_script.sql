@@ -383,8 +383,8 @@ INSERT INTO categories (name, description) VALUES
 
 -- Insert Products
 INSERT INTO products (name, description, price, category_id, currency_id, image_url, brand) VALUES
-('TechPhone 12', 'A flagship smartphone with a stunning display and pro-grade camera.', 999.99, 1, 2, 'https://images.pexels.com/photos/15636030/pexels-photo-15636030.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', 'TechBrand'),
-('ProBook X', 'An ultrathin laptop with exceptional performance and all-day battery life.', 1299.99, 2, 2, 'https://images.pexels.com/photos/38568/macbook-laptop-ipad-apple-38568.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', 'TechBrand'),
+('TechPhone 12', 'A flagship smartphone with a stunning display and pro-grade camera.', 999.99, 1, 2, 'https://images.pexels.com/photos/47261/pexels-photo-47261.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', 'TechBrand'),
+('ProBook X', 'An ultrathin laptop with exceptional performance and all-day battery life.', 1299.99, 2, 2, 'https://images.pexels.com/photos/205421/pexels-photo-205421.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1', 'TechBrand'),
 ('SoundWave Buds', 'True wireless earbuds with active noise cancellation and rich audio.', 149.99, 3, 2, 'https://images.pexels.com/photos/4050289/pexels-photo-4050289.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', 'AudioPhile'),
 ('GamerKey Pro', 'A mechanical gaming keyboard with customizable RGB lighting.', 119.99, 4, 2, 'https://images.pexels.com/photos/7238759/pexels-photo-7238759.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', 'GamerGear'),
 ('PowerUp Charger', 'A fast-charging wall adapter for all your devices.', 29.99, 5, 2, 'https://images.pexels.com/photos/4050303/pexels-photo-4050303.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', 'TechBrand'),

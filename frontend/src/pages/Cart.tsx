@@ -118,7 +118,7 @@ const Cart: React.FC = () => {
           {cart.items.map(item => (
             <div key={item.cart_item_id} className="bg-gray-800 rounded-lg shadow-md p-4 flex items-center justify-between border border-gray-700">
               <div className="text-white font-semibold text-lg">
-                Product ID: {item.product_id}
+                Product: {item.name}
               </div>
               <div className="text-gray-400 text-base">
                 Quantity: {item.quantity}

@@ -9,7 +9,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { syncAuth } = useAuth();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,25 +18,17 @@ const Login: React.FC = () => {
     setSuccess(false);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Invalid credentials');
-      }
-
-      // The backend now sets an httpOnly cookie, so no need to store token in localStorage
-      // The profile data is returned directly from the login endpoint
-      const user = await response.json();
-      // We don't store user data in localStorage anymore, useAuth will fetch it from /profile
-
-      syncAuth(); // Sync auth state by calling the profile endpoint
+      const user = await login(email, password);
       setSuccess(true);
-      setTimeout(() => navigate('/'), 1000); // Redirect to home/dashboard
+
+      if (user.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else if (user.role === 'staff') {
+        navigate('/staff', { replace: true });
+      } else {
+        navigate('/products', { replace: true });
+      }
+      window.location.reload();
     } catch (err: any) {
       setError(err.message);
     } finally {

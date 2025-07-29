@@ -122,7 +122,35 @@ const Orders: React.FC = () => {
         </div>
       )}
 
-      
+      {editingId && (
+        <form onSubmit={handleSubmit} className="mb-8 p-4 bg-gray-700 rounded-lg flex items-center gap-4">
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="px-4 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+          >
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button
+            type="submit"
+            className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
+          >
+            Update Order
+          </button>
+          <button
+            type="button"
+            onClick={() => setEditingId(null)}
+            className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
+          >
+            Cancel
+          </button>
+        </form>
+      )}
 
       <div className="overflow-x-auto">
         <table className="w-full border-collapse bg-gray-700 rounded-lg overflow-hidden">

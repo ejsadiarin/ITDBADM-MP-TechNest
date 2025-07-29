@@ -94,11 +94,11 @@ export class CartItemsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const result: any[] = await queryRunner.query(
+      const result: any = await queryRunner.query(
         'DELETE FROM cart_items WHERE cart_item_id = ?',
         [id],
       );
-      if (result[0].affectedRows === 0) {
+      if (result.affectedRows === 0) {
         throw new NotFoundException(`CartItem with ID ${id} not found`);
       }
       await queryRunner.commitTransaction();

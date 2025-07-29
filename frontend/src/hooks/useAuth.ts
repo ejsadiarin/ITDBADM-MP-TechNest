@@ -32,9 +32,33 @@ export const useAuth = () => {
 
   useEffect(() => {
     syncAuth();
-    // No longer need to listen to localStorage changes as session is cookie-based
-    // and profile endpoint will validate it.
   }, [syncAuth]);
 
-  return { isLoggedIn, userRole, userId, isLoading, syncAuth };
+  const login = useCallback(async (email, password) => {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Invalid credentials');
+    }
+
+    const user = await response.json();
+    setIsLoggedIn(true);
+    setUserRole(user.role);
+    setUserId(user.user_id);
+    return user;
+  }, []);
+
+  const logout = useCallback(async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    setIsLoggedIn(false);
+    setUserRole(null);
+    setUserId(null);
+  }, []);
+
+  return { isLoggedIn, userRole, userId, isLoading, login, logout, syncAuth };
 };

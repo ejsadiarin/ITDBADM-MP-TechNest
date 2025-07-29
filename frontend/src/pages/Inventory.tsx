@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 interface InventoryItem {
   inventory_id: number;
   product_id: number;
+  product_name: string; // Added to display the product name
   stock_quantity: number;
   last_updated: string;
 }
@@ -140,52 +141,28 @@ const Inventory: React.FC = () => {
         </div>
       )}
 
-      {(userRole === 'admin' || userRole === 'staff') && (
-        <form onSubmit={handleSubmit} className="mb-8 p-4 bg-gray-700 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
-          <select
-            name="product_id"
-            value={formData.product_id}
-            onChange={handleChange}
-            required
-            className="px-4 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-          >
-            <option value="">Select Product</option>
-            {products.map((product) => (
-              <option key={product.product_id} value={product.product_id}>
-                {product.name}
-              </option>
-            ))}
-          </select>
+      {editingId && (
+        <form onSubmit={handleSubmit} className="mb-8 p-4 bg-gray-700 rounded-lg flex items-center gap-4">
           <input
+            type="number"
             name="stock_quantity"
             value={formData.stock_quantity}
             onChange={handleChange}
-            placeholder="Stock Quantity"
-            type="number"
-            required
             className="px-4 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
           />
           <button
             type="submit"
-            className="col-span-2 bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
+            className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
           >
-            {editingId ? 'Update Inventory' : 'Add Inventory'}
+            Update Stock
           </button>
-          {editingId && (
-            <button
-              type="button"
-              onClick={() => {
-                setEditingId(null);
-                setFormData({
-                  product_id: 0,
-                  stock_quantity: 0,
-                });
-              }}
-              className="col-span-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
-            >
-              Cancel Edit
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setEditingId(null)}
+            className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
+          >
+            Cancel
+          </button>
         </form>
       )}
 
@@ -194,7 +171,7 @@ const Inventory: React.FC = () => {
           <thead>
             <tr className="bg-gray-600 text-cyan-400 font-semibold">
               <th className="p-3 text-left">Inventory ID</th>
-              <th className="p-3 text-left">Product ID</th>
+              <th className="p-3 text-left">Product Name</th>
               <th className="p-3 text-left">Stock Quantity</th>
               <th className="p-3 text-left">Last Updated</th>
               {(userRole === 'admin' || userRole === 'staff') && <th className="p-3 text-left">Actions</th>}
@@ -204,7 +181,7 @@ const Inventory: React.FC = () => {
             {items.map(item => (
               <tr key={item.inventory_id} className="border-b border-gray-600 last:border-b-0">
                 <td className="p-3">{item.inventory_id}</td>
-                <td className="p-3">{item.product_id}</td>
+                <td className="p-3">{item.product_name}</td>
                 <td className="p-3">{item.stock_quantity}</td>
                 <td className="p-3">{new Date(item.last_updated).toLocaleString()}</td>
                 {(userRole === 'admin' || userRole === 'staff') && (
@@ -227,7 +204,6 @@ const Inventory: React.FC = () => {
             ))}
           </tbody>
         </table>
-        )
       </div>
     </div>
   );

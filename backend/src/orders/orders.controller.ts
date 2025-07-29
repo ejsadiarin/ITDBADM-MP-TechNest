@@ -21,14 +21,7 @@ import { UserRole } from '../users/entities/user.entity';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.CUSTOMER, UserRole.ADMIN, UserRole.STAFF)
-  @Post()
-  create(@Body() createOrderDto: CreateOrderDto, @Req() req: any) {
-    // Ensure the user_id in the DTO matches the authenticated user's ID
-    createOrderDto.user_id = req.user.user_id;
-    return this.ordersService.create(createOrderDto);
-  }
+  
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CUSTOMER)
