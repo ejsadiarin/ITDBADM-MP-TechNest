@@ -21,13 +21,18 @@ import StaffDashboard from './pages/staff/StaffDashboard';
 import { useAuth } from './hooks/useAuth';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; roles?: string[] }> = ({ children, roles }) => {
-  const { isLoggedIn, userRole } = useAuth();
+  const { isLoggedIn, userRole, isLoading } = useAuth();
+
+  if (isLoading) return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading...</div>;
 
   if (!isLoggedIn) {
     return <Navigate to="/login" replace />;
   }
 
   if (roles && userRole && !roles.includes(userRole)) {
+    // Redirect to default page for their role
+    if (userRole === 'admin') return <Navigate to="/admin" replace />;
+    if (userRole === 'staff') return <Navigate to="/staff" replace />;
     return <Navigate to="/products" replace />;
   }
 
@@ -35,21 +40,33 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; roles?: string[] }> 
 };
 
 const App: React.FC = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, userRole, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading...</div>;
+  }
+
+  // Determine default route based on role
+  const getDefaultRoute = () => {
+    if (!isLoggedIn) return <Home />;
+    if (userRole === 'admin') return <Navigate to="/admin" replace />;
+    if (userRole === 'staff') return <Navigate to="/staff" replace />;
+    return <Navigate to="/products" replace />;
+  };
 
   return (
     <Router>
       <div className="bg-gray-900 text-white flex min-h-screen">
         {isLoggedIn && <Sidebar />}
-        <div className={`flex-1 flex flex-col ${isLoggedIn ? 'ml-64' : 'ml-0 w-full'}`}> {/* Adjust margin and width based on login status */}
+        <div className={`flex-1 flex flex-col ${isLoggedIn ? 'ml-64' : 'ml-0 w-full'}`}>
           {isLoggedIn && <Header />}
           <main className="p-6 mt-16 flex-1">
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/" element={isLoggedIn ? <Navigate to="/products" replace /> : <Home />} /> {/* Redirect to products if logged in, else show Home */}
+              <Route path="/" element={getDefaultRoute()} />
 
-              {/* Protected Routes (require login) */}
+              {/* Customer & All Authenticated Users */}
               <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
               <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
               <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
@@ -58,11 +75,11 @@ const App: React.FC = () => {
               <Route path="/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
               <Route path="/order-items" element={<ProtectedRoute><OrderItems /></ProtectedRoute>} />
 
-              {/* Staff and Admin Routes (require specific roles) */}
+              {/* Staff and Admin */}
               <Route path="/inventory" element={<ProtectedRoute roles={['staff', 'admin']}><Inventory /></ProtectedRoute>} />
               <Route path="/staff" element={<ProtectedRoute roles={['staff', 'admin']}><StaffDashboard /></ProtectedRoute>} />
 
-              {/* Admin Only Routes (require admin role) */}
+              {/* Admin Only */}
               <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
               <Route path="/admin/users" element={<ProtectedRoute roles={['admin']}><UserManagement /></ProtectedRoute>} />
               <Route path="/admin/products" element={<ProtectedRoute roles={['admin']}><ProductManagement /></ProtectedRoute>} />

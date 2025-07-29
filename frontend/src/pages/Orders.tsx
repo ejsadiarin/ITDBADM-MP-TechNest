@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Notification from '../components/Notification';
+import { useAuth } from '../hooks/useAuth';
 
 interface Order {
   order_id: number;
@@ -15,21 +16,37 @@ const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isLoggedIn, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
+    if (authLoading) {
+      return; // Wait for authentication status to be determined
+    }
+
+    if (!isLoggedIn) {
+      setLoading(false);
+      setError('You must be logged in to view orders.');
+      return;
+    }
+
     fetch('/api/orders')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Failed to fetch orders');
+        }
+        return res.json();
+      })
       .then(data => {
         setOrders(Array.isArray(data) ? data : []);
         setLoading(false);
       })
-      .catch(() => {
-        setError('Failed to fetch orders');
+      .catch(err => {
+        setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [isLoggedIn, authLoading]);
 
-  if (loading) return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading orders...</div>;
+  if (loading || authLoading) return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading orders...</div>;
   if (error) return <Notification message={error} type="error" />;
 
   return (

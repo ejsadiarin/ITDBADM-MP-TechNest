@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -8,6 +9,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { syncAuth } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,26 +29,14 @@ const Login: React.FC = () => {
         throw new Error(errorData.message || 'Invalid credentials');
       }
 
-      const data = await response.json();
-      localStorage.setItem('token', data.accessToken);
+      // The backend now sets an httpOnly cookie, so no need to store token in localStorage
+      // The profile data is returned directly from the login endpoint
+      const user = await response.json();
+      // We don't store user data in localStorage anymore, useAuth will fetch it from /profile
 
-      // Fetch user profile to store role and other details
-      const profileResponse = await fetch('/api/auth/profile', {
-        headers: {
-          'Authorization': `Bearer ${data.accessToken}`,
-        },
-      });
-
-      if (!profileResponse.ok) {
-        throw new Error('Failed to fetch profile after login');
-      }
-
-      const user = await profileResponse.json();
-      localStorage.setItem('user', JSON.stringify(user));
-
+      syncAuth(); // Sync auth state by calling the profile endpoint
       setSuccess(true);
-      // Redirect directly to /products after successful login
-      setTimeout(() => navigate('/products'), 1000);
+      setTimeout(() => navigate('/'), 1000); // Redirect to home/dashboard
     } catch (err: any) {
       setError(err.message);
     } finally {

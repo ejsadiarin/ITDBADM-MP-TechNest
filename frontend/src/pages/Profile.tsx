@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 interface UserProfile {
   user_id: number;
@@ -17,21 +18,12 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { syncAuth } = useAuth();
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
       try {
-        const response = await fetch('/api/auth/profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const response = await fetch('/api/auth/profile');
 
         if (!response.ok) {
           throw new Error('Failed to fetch profile');
@@ -41,6 +33,8 @@ const Profile: React.FC = () => {
         setUser(data);
       } catch (err: any) {
         setError(err.message);
+        // If profile fetch fails, it means the session is invalid
+        // Clear any lingering local storage items (though they shouldn't be used now)
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         navigate('/login');
@@ -52,10 +46,24 @@ const Profile: React.FC = () => {
     fetchProfile();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
+
+      // // Clear local storage items (though they shouldn't be used now)
+      // localStorage.removeItem('token');
+      // localStorage.removeItem('user');
+      syncAuth(); // Update auth state
+      navigate('/login');
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   if (loading) return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading profile...</div>;
