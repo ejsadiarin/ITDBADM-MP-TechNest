@@ -17,7 +17,7 @@ export class ProductsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const result: any[] = await queryRunner.query(
+      const result: any = await queryRunner.query(
         'INSERT INTO products(name, description, price, category_id, image_url, brand) VALUES (?, ?, ?, ?, ?, ?)',
         [
           createProductDto.name,
@@ -28,8 +28,9 @@ export class ProductsService {
           createProductDto.brand,
         ],
       );
+      const insertId = result.insertId;
       await queryRunner.commitTransaction();
-      return this.findOne(result[0].insertId);
+      return this.findOne(insertId);
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
@@ -112,11 +113,11 @@ export class ProductsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const result: any[] = await queryRunner.query(
+      const result: any = await queryRunner.query(
         'DELETE FROM products WHERE product_id = ?',
         [id],
       );
-      if (result[0].affectedRows === 0) {
+      if (result.affectedRows === 0) {
         throw new NotFoundException(`Product with ID ${id} not found`);
       }
       await queryRunner.commitTransaction();
@@ -126,5 +127,12 @@ export class ProductsService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async getProductDetails(productId: number): Promise<any> {
+    const result = await this.dataSource.query('CALL GetProductDetails(?)', [
+      productId,
+    ]);
+    return result[0]; // The first result set contains the data
   }
 }

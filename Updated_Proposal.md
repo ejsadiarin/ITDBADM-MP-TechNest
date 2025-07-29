@@ -394,6 +394,20 @@ CREATE TABLE IF NOT EXISTS transaction_logs (
     DELIMITER ;
     ```
 
+10.  **`after_insert_product_create_inventory`**
+    - **Event:** `AFTER INSERT` on `products`
+    - **Purpose:** Automatically creates an inventory record on product insert.
+  ```sql
+  CREATE TRIGGER after_insert_product_create_inventory
+  AFTER INSERT ON products
+  FOR EACH ROW
+  BEGIN
+      INSERT INTO inventory (product_id, stock_quantity)
+      VALUES (NEW.product_id, 1);
+  END
+  $$ DELIMITER ;
+  ```
+
 ### **Stored Procedures (5 Total)**
 
 1.  **`GetProductDetails`**
@@ -586,3 +600,59 @@ BEGIN
 END$$
 DELIMITER ;
 ```
+
+# Demo Presentation Flow
+
+## Customer Flow
+
+1. **Login/Registration:**  
+   * New users register with email/password or social media accounts.  
+   * Existing users log in.  
+2. **Product Browsing:**  
+   * Search and filter products.  
+   * View product details (images, descriptions, reviews).  
+   * Add items to the cart.  
+3. **Shopping Cart:**  
+   * Add/remove items from cart.  
+   * Adjust quantities.  
+   * View cart total.  
+4. **Checkout:**  
+   * Enter shipping address.  
+   * Select shipping method.  
+   * Choose a mock payment method (credit card, e-wallet, etc.).  
+   * Confirm order.  
+5. **Order Tracking:**  
+   * View order history.  
+   * Track current order status.  
+6. **Profile Management:**  
+   * Update personal information.  
+   * Manage addresses.  
+   * Change password.  
+   * View past orders.
+
+## Staff Flow
+
+1. **Login:**  
+   * Staff login with assigned credentials.  
+2. **Order Management:**  
+   * View new orders.  
+   * Process orders (confirm, pack, ship).  
+   * Update order status.  
+3. **Inventory Management:**  
+   * View product stock levels.  
+   * Update inventory (add new stock, mark out of stock).  
+   * Manage product details (price, description, images).
+
+## Admin Flow
+
+1. **Login:**  
+   * Admin login with specific credentials.  
+2. **User Management:**  
+   * Manage customer accounts (view, edit, suspend).  
+   * Manage staff accounts (add, edit, deactivate).  
+3. **Product Management:**  
+   * Add/edit/delete products.  
+   * Manage categories and brands.  
+4. **Order Management:**  
+   * Oversee all orders (READ ONLY).  
+   * Generate sales reports.

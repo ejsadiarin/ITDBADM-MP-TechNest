@@ -16,9 +16,14 @@ const Orders: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isLoggedIn, isLoading: authLoading } = useAuth();
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [formData, setFormData] = useState<Partial<Order>>({
+    status: '',
+  });
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const { isLoggedIn, isLoading: authLoading, userRole } = useAuth();
 
-  useEffect(() => {
+  const fetchOrders = async () => {
     if (authLoading) {
       return; // Wait for authentication status to be determined
     }
@@ -29,32 +34,132 @@ const Orders: React.FC = () => {
       return;
     }
 
-    fetch('/api/orders')
-      .then(res => {
-        if (!res.ok) {
-          throw new Error('Failed to fetch orders');
-        }
-        return res.json();
-      })
-      .then(data => {
-        setOrders(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
+    try {
+      const response = await fetch('/api/orders', {
+        credentials: 'include', // Send cookies with the request
       });
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders');
+      }
+      const data = await response.json();
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
   }, [isLoggedIn, authLoading]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setNotification(null);
+    try {
+      const response = await fetch(`/api/orders/${editingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update order');
+      }
+
+      setNotification({ message: 'Order updated successfully!', type: 'success' });
+      setEditingId(null);
+      setFormData({ status: '' });
+      fetchOrders();
+    } catch (err: any) {
+      setNotification({ message: err.message || 'Failed to update order.', type: 'error' });
+    }
+  };
+
+  const handleEdit = (order: Order) => {
+    setEditingId(order.order_id);
+    setFormData({ status: order.status });
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this order?')) return;
+    setNotification(null);
+    try {
+      const response = await fetch(`/api/orders/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete order');
+      }
+
+      setNotification({ message: 'Order deleted successfully!', type: 'success' });
+      fetchOrders();
+    } catch (err: any) {
+      setNotification({ message: err.message || 'Failed to delete order.', type: 'error' });
+    }
+  };
 
   if (loading || authLoading) return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading orders...</div>;
   if (error) return <Notification message={error} type="error" />;
 
   return (
     <div className="max-w-4xl mx-auto p-8 bg-gray-800 rounded-lg shadow-lg text-white">
-      <h2 className="text-3xl font-bold text-center text-cyan-400 mb-8">Your Orders</h2>
-      {orders.length === 0 ? (
-        <div className="text-center text-gray-500 text-lg">No orders found.</div>
-      ) : (
+      <h2 className="text-3xl font-bold text-center text-cyan-400 mb-8">Order Management</h2>
+
+      {notification && (
+        <div className="my-4">
+          <Notification message={notification.message} type={notification.type} />
+        </div>
+      )}
+
+      {(userRole === 'admin' || userRole === 'staff') && (
+        <form onSubmit={handleSubmit} className="mb-8 p-4 bg-gray-700 rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            required
+            className="px-4 py-2 bg-gray-600 border border-gray-500 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+          >
+            <option value="">Select Status</option>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button
+            type="submit"
+            className="col-span-2 bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
+          >
+            {editingId ? 'Update Order' : 'Add Order'}
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingId(null);
+                setFormData({ status: '' });
+              }}
+              className="col-span-2 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
+            >
+              Cancel Edit
+            </button>
+          )}
+        </form>
+      )}
+
+      <div className="overflow-x-auto">
         <table className="w-full border-collapse bg-gray-700 rounded-lg overflow-hidden">
           <thead>
             <tr className="bg-gray-600 text-cyan-400 font-semibold">
@@ -63,6 +168,7 @@ const Orders: React.FC = () => {
               <th className="p-3 text-left">Total</th>
               <th className="p-3 text-left">Status</th>
               <th className="p-3 text-left">Shipping Address</th>
+              {(userRole === 'admin' || userRole === 'staff') && <th className="p-3 text-left">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -73,11 +179,29 @@ const Orders: React.FC = () => {
                 <td className="p-3">${Number(order.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                 <td className="p-3">{order.status}</td>
                 <td className="p-3">{order.shipping_address}</td>
+                {(userRole === 'admin' || userRole === 'staff') && (
+                  <td className="p-3">
+                    <button
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-lg transition-colors duration-300 mr-2"
+                      onClick={() => handleEdit(order)}
+                    >
+                      Edit
+                    </button>
+                    {userRole === 'admin' && (
+                      <button
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-lg transition-colors duration-300"
+                        onClick={() => handleDelete(order.order_id)}
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </table>
-      )}
+      </div>
     </div>
   );
 };

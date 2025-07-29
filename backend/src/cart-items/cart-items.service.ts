@@ -17,16 +17,33 @@ export class CartItemsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const result: any[] = await queryRunner.query(
-        'INSERT INTO cart_items(cart_id, product_id, quantity) VALUES (?, ?, ?)',
-        [
-          createCartItemDto.cart_id,
-          createCartItemDto.product_id,
-          createCartItemDto.quantity,
-        ],
+      const [existingItem] = await queryRunner.query(
+        'SELECT * FROM cart_items WHERE cart_id = ? AND product_id = ?',
+        [createCartItemDto.cart_id, createCartItemDto.product_id],
       );
-      await queryRunner.commitTransaction();
-      return this.findOne(result[0].insertId);
+
+      if (existingItem) {
+        // If item already exists, update quantity
+        await queryRunner.query(
+          'UPDATE cart_items SET quantity = quantity + ? WHERE cart_item_id = ?',
+          [createCartItemDto.quantity, existingItem.cart_item_id],
+        );
+        await queryRunner.commitTransaction();
+        return this.findOne(existingItem.cart_item_id);
+      } else {
+        // If item does not exist, insert new item
+        const result: any = await queryRunner.query(
+          'INSERT INTO cart_items(cart_id, product_id, quantity) VALUES (?, ?, ?)',
+          [
+            createCartItemDto.cart_id,
+            createCartItemDto.product_id,
+            createCartItemDto.quantity,
+          ],
+        );
+        const insertId = result.insertId;
+        await queryRunner.commitTransaction();
+        return this.findOne(insertId);
+      }
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;

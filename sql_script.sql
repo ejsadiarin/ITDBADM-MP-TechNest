@@ -234,6 +234,17 @@ BEGIN
 END
 $$ DELIMITER ;
 
+-- Automatically creates an inventory record on product insert
+DELIMITER $$
+CREATE TRIGGER after_insert_product_create_inventory
+AFTER INSERT ON products
+FOR EACH ROW
+BEGIN
+    INSERT INTO inventory (product_id, stock_quantity)
+    VALUES (NEW.product_id, 1);
+END
+$$ DELIMITER ;
+
 -- ==============================
 --      STORED PROCEDURES
 -- ==============================
@@ -327,14 +338,16 @@ $$ DELIMITER ;
 -- Logs payment activity for an order in the transaction_logs table
 DELIMITER $$
 CREATE PROCEDURE LogTransaction(
+    IN p_user_id INT,
     IN p_order_id INT,
     IN p_payment_method VARCHAR(50),
     IN p_status VARCHAR(50),
     IN p_amount DECIMAL(10,2)
 )
 BEGIN
-    INSERT INTO transaction_logs (action_type, table_name, record_id, new_value)
+    INSERT INTO transaction_logs (user_id, action_type, table_name, record_id, new_value)
     VALUES (
+        p_user_id,
         'PAYMENT_ATTEMPT',
         'orders',
         p_order_id,
@@ -370,21 +383,20 @@ INSERT INTO categories (name, description) VALUES
 
 -- Insert Products
 INSERT INTO products (name, description, price, category_id, currency_id, image_url, brand) VALUES
-('TechPhone 12', 'A flagship smartphone with a stunning display and pro-grade camera.', 999.99, 1, 2, '/images/techphone12.jpg', 'TechBrand'),
-('ProBook X', 'An ultrathin laptop with exceptional performance and all-day battery life.', 1299.99, 2, 2, '/images/probookx.jpg', 'TechBrand'),
-('SoundWave Buds', 'True wireless earbuds with active noise cancellation and rich audio.', 149.99, 3, 2, '/images/soundwavebuds.jpg', 'AudioPhile'),
-('GamerKey Pro', 'A mechanical gaming keyboard with customizable RGB lighting.', 119.99, 4, 2, '/images/gamerkeypro.jpg', 'GamerGear'),
-('PowerUp Charger', 'A fast-charging wall adapter for all your devices.', 29.99, 5, 2, '/images/powerupcharger.jpg', 'TechBrand'),
-('Stealth Mouse', 'A high-precision wireless gaming mouse with an ergonomic design.', 89.99, 4, 2, '/images/stealthmouse.jpg', 'GamerGear');
+('TechPhone 12', 'A flagship smartphone with a stunning display and pro-grade camera.', 999.99, 1, 2, 'https://images.pexels.com/photos/15636030/pexels-photo-15636030.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', 'TechBrand'),
+('ProBook X', 'An ultrathin laptop with exceptional performance and all-day battery life.', 1299.99, 2, 2, 'https://images.pexels.com/photos/38568/macbook-laptop-ipad-apple-38568.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', 'TechBrand'),
+('SoundWave Buds', 'True wireless earbuds with active noise cancellation and rich audio.', 149.99, 3, 2, 'https://images.pexels.com/photos/4050289/pexels-photo-4050289.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', 'AudioPhile'),
+('GamerKey Pro', 'A mechanical gaming keyboard with customizable RGB lighting.', 119.99, 4, 2, 'https://images.pexels.com/photos/7238759/pexels-photo-7238759.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', 'GamerGear'),
+('PowerUp Charger', 'A fast-charging wall adapter for all your devices.', 29.99, 5, 2, 'https://images.pexels.com/photos/4050303/pexels-photo-4050303.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', 'TechBrand'),
+('Stealth Mouse', 'A high-precision wireless gaming mouse with an ergonomic design.', 89.99, 4, 2, 'https://images.pexels.com/photos/459762/pexels-photo-459762.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260', 'GamerGear');
 
 -- Populate Inventory
-INSERT INTO inventory (product_id, stock_quantity) VALUES
-(1, 100),
-(2, 50),
-(3, 200),
-(4, 75),
-(5, 500),
-(6, 120);
+INSERT INTO inventory (product_id, stock_quantity) VALUES (1, 100) ON DUPLICATE KEY UPDATE stock_quantity = 100;
+INSERT INTO inventory (product_id, stock_quantity) VALUES (2, 50) ON DUPLICATE KEY UPDATE stock_quantity = 50;
+INSERT INTO inventory (product_id, stock_quantity) VALUES (3, 200) ON DUPLICATE KEY UPDATE stock_quantity = 200;
+INSERT INTO inventory (product_id, stock_quantity) VALUES (4, 75) ON DUPLICATE KEY UPDATE stock_quantity = 75;
+INSERT INTO inventory (product_id, stock_quantity) VALUES (5, 500) ON DUPLICATE KEY UPDATE stock_quantity = 500;
+INSERT INTO inventory (product_id, stock_quantity) VALUES (6, 120) ON DUPLICATE KEY UPDATE stock_quantity = 120;
 
 -- Create Carts for Customers
 INSERT INTO cart (user_id) VALUES (3), (4);
@@ -403,3 +415,4 @@ INSERT INTO orders (user_id, total_amount, status, shipping_address, currency_id
 (3, 89.99, 'delivered', '123 Maple Street', 2);
 INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES
 (1, 6, 1, 89.99); -- An order for a Stealth Mouse
+

@@ -6,12 +6,19 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { TransactionLogsService } from './transaction-logs.service';
 import { CreateTransactionLogDto } from './dto/create-transaction-log.dto';
 import { UpdateTransactionLogDto } from './dto/update-transaction-log.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import { UserRole } from '../users/entities/user.entity';
 
 @Controller('transaction-logs')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
 export class TransactionLogsController {
   constructor(
     private readonly transactionLogsService: TransactionLogsService,

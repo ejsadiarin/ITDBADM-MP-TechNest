@@ -17,12 +17,16 @@ export class CategoriesService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const result: any[] = await queryRunner.query(
+      const result: any = await queryRunner.query(
         'INSERT INTO categories(name, description) VALUES (?, ?)',
-        [createCategoryDto.name, createCategoryDto.description],
+        [
+          createCategoryDto.name,
+          createCategoryDto.description,
+        ],
       );
+      const insertId = result.insertId;
       await queryRunner.commitTransaction();
-      return this.findOne(result[0].insertId);
+      return this.findOne(insertId);
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;

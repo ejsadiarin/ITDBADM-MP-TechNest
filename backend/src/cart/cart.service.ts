@@ -17,12 +17,13 @@ export class CartService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const result: any[] = await queryRunner.query(
+      const result: any = await queryRunner.query(
         'INSERT INTO cart(user_id) VALUES (?)',
         [createCartDto.user_id],
       );
+      const insertId = result.insertId;
       await queryRunner.commitTransaction();
-      return this.findOne(result[0].insertId);
+      return this.findOne(insertId);
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
@@ -52,7 +53,9 @@ export class CartService {
       [userId],
     );
     if (!cart) {
-      throw new NotFoundException(`Cart for user with ID ${userId} not found`);
+      // If cart doesn't exist, create one
+      const newCart = await this.create({ user_id: userId });
+      return { ...newCart, items: [] };
     }
 
     const cartItems = await this.dataSource.query(

@@ -19,16 +19,23 @@ const Cart: React.FC = () => {
   const [cart, setCart] = useState<CartData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isLoading: authLoading } = useAuth();
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const fetchCart = useCallback(() => {
+    if (authLoading) {
+      return; // Wait for authentication status to be determined
+    }
+
     if (!isLoggedIn) {
       setError('You must be logged in to view your cart.');
       setLoading(false);
       return;
     }
 
-    fetch('/api/cart')
+    fetch('/api/cart', {
+      credentials: 'include', // Send cookies with the request
+    })
       .then(async res => {
         if (res.status === 404) { // Cart not found for user
           setCart({ cart_id: 0, items: [] }); // Treat as empty cart
@@ -48,16 +55,17 @@ const Cart: React.FC = () => {
         setError(err.message);
         setLoading(false);
       });
-  }, [isLoggedIn]);
+  }, [isLoggedIn, authLoading]);
 
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
 
   const handleRemoveItem = (itemId: number) => {
-    fetch(`/api/cart-items/${itemId}`, { 
+    fetch(`/api/cart-items/${itemId}`, {
       method: 'DELETE',
-     })
+      credentials: 'include', // Send cookies with the request
+    })
       .then(res => {
         if (res.ok) {
           fetchCart(); // Refetch cart to update the view
@@ -68,12 +76,43 @@ const Cart: React.FC = () => {
       .catch(() => setError('Failed to remove item from cart'));
   };
 
+  const handleCheckout = async () => {
+    if (!cart || cart.items.length === 0) {
+      setNotification({ message: 'Your cart is empty.', type: 'error' });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/orders/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shipping_address: '123 Mock Address, Mock City' }), // Mock address
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Checkout failed');
+      }
+
+      setNotification({ message: 'Checkout successful! Your order has been placed.', type: 'success' });
+      setCart({ cart_id: cart.cart_id, items: [] }); // Clear cart after successful checkout
+    } catch (err: any) {
+      setNotification({ message: err.message || 'Checkout failed.', type: 'error' });
+    }
+  };
+
   if (loading) return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading cart...</div>;
   if (error) return <Notification message={error} type="error" />;
 
   return (
     <div className="w-full p-4">
       <h1 className="text-3xl font-bold text-center text-cyan-400 mb-8">Your Cart</h1>
+      {notification && (
+        <div className="my-4">
+          <Notification message={notification.message} type={notification.type} />
+        </div>
+      )}
       {cart && cart.items.length > 0 ? (
         <div className="flex flex-col gap-4 max-w-2xl mx-auto">
           {cart.items.map(item => (
@@ -95,6 +134,17 @@ const Cart: React.FC = () => {
         </div>
       ) : (
         <div className="text-center text-gray-500">Your cart is empty.</div>
+      )}
+
+      {cart && cart.items.length > 0 && (
+        <div className="text-center mt-8">
+          <button
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300"
+            onClick={handleCheckout}
+          >
+            Proceed to Checkout
+          </button>
+        </div>
       )}
     </div>
   );

@@ -17,7 +17,7 @@ export class OrderItemsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const result: any[] = await queryRunner.query(
+      const result: any = await queryRunner.query(
         'INSERT INTO order_items(order_id, product_id, quantity, price_at_purchase) VALUES (?, ?, ?, ?)',
         [
           createOrderItemDto.order_id,
@@ -26,8 +26,9 @@ export class OrderItemsService {
           createOrderItemDto.price_at_purchase,
         ],
       );
+      const insertId = result.insertId;
       await queryRunner.commitTransaction();
-      return this.findOne(result[0].insertId);
+      return this.findOne(insertId);
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
@@ -55,42 +56,24 @@ export class OrderItemsService {
     id: number,
     updateOrderItemDto: UpdateOrderItemDto,
   ): Promise<OrderItem> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      await queryRunner.query(
+    return this.dataSource.transaction(async (transactionalEntityManager) => {
+      await transactionalEntityManager.query(
         'UPDATE order_items SET ? WHERE order_item_id = ?',
         [updateOrderItemDto, id],
       );
-      await queryRunner.commitTransaction();
       return this.findOne(id);
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
+    });
   }
 
   async remove(id: number): Promise<void> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      const result: any[] = await queryRunner.query(
+    return this.dataSource.transaction(async (transactionalEntityManager) => {
+      const result: any[] = await transactionalEntityManager.query(
         'DELETE FROM order_items WHERE order_item_id = ?',
         [id],
       );
       if (result[0].affectedRows === 0) {
         throw new NotFoundException(`OrderItem with ID ${id} not found`);
       }
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
+    });
   }
 }

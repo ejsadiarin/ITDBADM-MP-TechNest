@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import Notification from '../components/Notification';
 
 interface Product {
   product_id: number;
@@ -20,6 +22,9 @@ const Products: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const { isLoggedIn, userId } = useAuth();
+
   const [filters, setFilters] = useState({
     search: '',
     category: '',
@@ -76,9 +81,55 @@ const Products: React.FC = () => {
     }));
   };
 
+  const handleAddToCart = async (productId: number) => {
+    if (!isLoggedIn) {
+      setNotification({ message: 'Please log in to add items to your cart.', type: 'error' });
+      return;
+    }
+
+    try {
+      // Get or create cart
+      const cartResponse = await fetch('/api/cart', {
+        credentials: 'include',
+      });
+
+      if (!cartResponse.ok) {
+        throw new Error('Failed to retrieve cart.');
+      }
+      const cartData = await cartResponse.json();
+      const cartId = cartData.cart_id;
+
+      // Add item to cart
+      const addItemResponse = await fetch('/api/cart-items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cart_id: cartId,
+          product_id: productId,
+          quantity: 1, // Default quantity to 1
+        }),
+        credentials: 'include',
+      });
+
+      if (!addItemResponse.ok) {
+        throw new Error('Failed to add item to cart.');
+      }
+
+      setNotification({ message: 'Item added to cart successfully!', type: 'success' });
+    } catch (error: any) {
+      setNotification({ message: error.message || 'Failed to add item to cart.', type: 'error' });
+    }
+  };
+
   return (
     <div className="bg-gray-900 min-h-screen p-4 sm:p-6 md:p-8">
       <h1 className="text-3xl sm:text-4xl font-bold text-center text-cyan-400 mb-8">Latest Tech Products</h1>
+
+      {notification && (
+        <div className="my-4">
+          <Notification message={notification.message} type={notification.type} />
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto mb-8 p-4 bg-gray-800 rounded-lg shadow-md flex flex-wrap items-center justify-center gap-4">
         <input type="text" name="search" placeholder="Search products..." value={filters.search} onChange={handleFilterChange} className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500" />
@@ -116,7 +167,12 @@ const Products: React.FC = () => {
                 <p className="text-gray-300 mt-2">{product.description}</p>
                 <div className="mt-4 flex items-center justify-between">
                   <p className="text-lg font-semibold text-white">${product.price.toLocaleString()}</p>
-                  <button className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">Add to Cart</button>
+                  <button
+                    className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300"
+                    onClick={() => handleAddToCart(product.product_id)}
+                  >
+                    Add to Cart
+                  </button>
                 </div>
               </div>
             </div>

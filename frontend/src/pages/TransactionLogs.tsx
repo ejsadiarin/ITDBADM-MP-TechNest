@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Notification from '../components/Notification';
+import { useAuth } from '../hooks/useAuth';
 
 interface TransactionLog {
   log_id: number;
@@ -16,18 +17,26 @@ const TransactionLogs: React.FC = () => {
   const [logs, setLogs] = useState<TransactionLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { userRole } = useAuth();
+
+  const fetchTransactionLogs = async () => {
+    try {
+      const response = await fetch('/api/transaction-logs', { credentials: 'include' })
+      if (!response.ok) {
+        throw new Error('Failed to fetch order items');
+      }
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : [];
+      setLogs(Array.isArray(data) ? data : []);
+    } catch (error: any) {
+      setError('Failed to fetch transaction logs: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    fetch('/api/transaction-logs')
-      .then(res => res.json())
-      .then(data => {
-        setLogs(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError('Failed to fetch transaction logs');
-        setLoading(false);
-      });
+    fetchTransactionLogs();
   }, []);
 
   if (loading) return <div className="text-center mt-10 text-cyan-400 font-semibold">Loading transaction logs...</div>;

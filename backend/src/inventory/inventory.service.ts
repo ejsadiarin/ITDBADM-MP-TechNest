@@ -17,12 +17,13 @@ export class InventoryService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const result: any[] = await queryRunner.query(
+      const result: any = await queryRunner.query(
         'INSERT INTO inventory(product_id, stock_quantity) VALUES (?, ?)',
         [createInventoryDto.product_id, createInventoryDto.stock_quantity],
       );
+      const insertId = result.insertId;
       await queryRunner.commitTransaction();
-      return this.findOne(result[0].insertId);
+      return this.findOne(insertId);
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
@@ -50,42 +51,42 @@ export class InventoryService {
     id: number,
     updateInventoryDto: UpdateInventoryDto,
   ): Promise<Inventory> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      await queryRunner.query('UPDATE inventory SET ? WHERE inventory_id = ?', [
-        updateInventoryDto,
-        id,
-      ]);
-      await queryRunner.commitTransaction();
+    return this.dataSource.transaction(async (transactionalEntityManager) => {
+      const [inventoryItem] = await transactionalEntityManager.query(
+        'SELECT product_id FROM inventory WHERE inventory_id = ?',
+        [id],
+      );
+
+      if (!inventoryItem) {
+        throw new NotFoundException(`Inventory with ID ${id} not found`);
+      }
+
+      if (updateInventoryDto.stock_quantity !== undefined) {
+        await transactionalEntityManager.query('CALL UpdateStock(?, ?)', [
+          inventoryItem.product_id,
+          updateInventoryDto.stock_quantity,
+        ]);
+      } else {
+        // If only other fields are updated, use direct update
+        await transactionalEntityManager.query(
+          'UPDATE inventory SET ? WHERE inventory_id = ?',
+          [updateInventoryDto, id],
+        );
+      }
+
       return this.findOne(id);
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
+    });
   }
 
   async remove(id: number): Promise<void> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      const result: any[] = await queryRunner.query(
+    return this.dataSource.transaction(async (transactionalEntityManager) => {
+      const result: any[] = await transactionalEntityManager.query(
         'DELETE FROM inventory WHERE inventory_id = ?',
         [id],
       );
       if (result[0].affectedRows === 0) {
         throw new NotFoundException(`Inventory with ID ${id} not found`);
       }
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
+    });
   }
 }

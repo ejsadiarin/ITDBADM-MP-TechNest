@@ -14,15 +14,27 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const queryRunner = this.usersRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    const newUser = this.usersRepository.create({
-      ...createUserDto,
-      password_hash: hashedPassword,
-      role: createUserDto.role, // Set role from DTO
-    });
+      const newUser = queryRunner.manager.create(User, {
+        ...createUserDto,
+        password_hash: hashedPassword,
+        role: createUserDto.role,
+      });
 
-    return this.usersRepository.save(newUser);
+      const savedUser = await queryRunner.manager.save(newUser);
+      await queryRunner.commitTransaction();
+      return savedUser;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async findAll(): Promise<User[]> {
@@ -50,13 +62,36 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(id);
-    const updatedUser = { ...user, ...updateUserDto };
-    return this.usersRepository.save(updatedUser);
+    const queryRunner = this.usersRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const user = await this.findOne(id);
+      const updatedUser = { ...user, ...updateUserDto };
+      const savedUser = await queryRunner.manager.save(updatedUser);
+      await queryRunner.commitTransaction();
+      return savedUser;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async remove(id: number): Promise<void> {
-    const user = await this.findOne(id);
-    await this.usersRepository.remove(user);
+    const queryRunner = this.usersRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const user = await this.findOne(id);
+      await queryRunner.manager.remove(user);
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

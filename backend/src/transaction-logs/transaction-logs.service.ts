@@ -19,7 +19,7 @@ export class TransactionLogsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const result: any[] = await queryRunner.query(
+      const result: any = await queryRunner.query(
         'INSERT INTO transaction_logs(user_id, action_type, table_name, record_id, old_value, new_value) VALUES (?, ?, ?, ?, ?, ?)',
         [
           createTransactionLogDto.user_id,
@@ -30,8 +30,9 @@ export class TransactionLogsService {
           createTransactionLogDto.new_value,
         ],
       );
+      const insertId = result.insertId;
       await queryRunner.commitTransaction();
-      return this.findOne(result[0].insertId);
+      return this.findOne(insertId);
     } catch (err) {
       await queryRunner.rollbackTransaction();
       throw err;
@@ -59,42 +60,24 @@ export class TransactionLogsService {
     id: number,
     updateTransactionLogDto: UpdateTransactionLogDto,
   ): Promise<TransactionLog> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      await queryRunner.query(
+    return this.dataSource.transaction(async (transactionalEntityManager) => {
+      await transactionalEntityManager.query(
         'UPDATE transaction_logs SET ? WHERE log_id = ?',
         [updateTransactionLogDto, id],
       );
-      await queryRunner.commitTransaction();
       return this.findOne(id);
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
+    });
   }
 
   async remove(id: number): Promise<void> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      const result: any[] = await queryRunner.query(
+    return this.dataSource.transaction(async (transactionalEntityManager) => {
+      const result: any[] = await transactionalEntityManager.query(
         'DELETE FROM transaction_logs WHERE log_id = ?',
         [id],
       );
       if (result[0].affectedRows === 0) {
         throw new NotFoundException(`TransactionLog with ID ${id} not found`);
       }
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
+    });
   }
 }
