@@ -14,7 +14,8 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const queryRunner = this.usersRepository.manager.connection.createQueryRunner();
+    const queryRunner =
+      this.usersRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
@@ -62,12 +63,16 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const queryRunner = this.usersRepository.manager.connection.createQueryRunner();
+    const queryRunner =
+      this.usersRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       const user = await this.findOne(id);
-      const updatedUser = { ...user, ...updateUserDto };
+      const updatedUser = this.usersRepository.create({
+        ...user,
+        ...updateUserDto,
+      });
       const savedUser = await queryRunner.manager.save(updatedUser);
       await queryRunner.commitTransaction();
       return savedUser;
@@ -80,7 +85,8 @@ export class UsersService {
   }
 
   async remove(id: number): Promise<void> {
-    const queryRunner = this.usersRepository.manager.connection.createQueryRunner();
+    const queryRunner =
+      this.usersRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
@@ -95,3 +101,4 @@ export class UsersService {
     }
   }
 }
+
