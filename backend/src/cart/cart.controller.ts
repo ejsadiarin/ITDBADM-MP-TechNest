@@ -6,10 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('cart')
 export class CartController {
@@ -20,9 +23,10 @@ export class CartController {
     return this.cartService.create(createCartDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.cartService.findAll();
+  findUserCart(@Req() req: any) {
+    return this.cartService.findCartByUserId(req.user.user_id);
   }
 
   @Get(':id')

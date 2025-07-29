@@ -46,6 +46,23 @@ export class CartService {
     return cart;
   }
 
+  async findCartByUserId(userId: number): Promise<any> {
+    const [cart] = await this.dataSource.query(
+      'SELECT * FROM cart WHERE user_id = ?',
+      [userId],
+    );
+    if (!cart) {
+      throw new NotFoundException(`Cart for user with ID ${userId} not found`);
+    }
+
+    const cartItems = await this.dataSource.query(
+      'SELECT * FROM cart_items WHERE cart_id = ?',
+      [cart.cart_id],
+    );
+
+    return { ...cart, items: cartItems };
+  }
+
   async update(id: number, updateCartDto: UpdateCartDto): Promise<Cart> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();

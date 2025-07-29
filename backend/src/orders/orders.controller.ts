@@ -6,10 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { UserRole } from '../users/entities/user.entity';
 
 @Controller('orders')
 export class OrdersController {
@@ -20,9 +24,14 @@ export class OrdersController {
     return this.ordersService.create(createOrderDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.ordersService.findAll();
+  findAll(@Req() req: any) {
+    const user = req.user;
+    if (user.role === UserRole.ADMIN || user.role === UserRole.STAFF) {
+      return this.ordersService.findAll();
+    }
+    return this.ordersService.findAllByUserId(user.user_id);
   }
 
   @Get(':id')

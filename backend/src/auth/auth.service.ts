@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User, UserRole } from '../users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { RegisterAuthDto } from './dto/register-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import * as bcrypt from 'bcrypt';
@@ -38,7 +38,7 @@ export class AuthService {
     return this.usersService.create({ ...registerAuthDto, role });
   }
 
-  async login(loginAuthDto: LoginAuthDto): Promise<{ accessToken: string }> {
+  async login(loginAuthDto: LoginAuthDto): Promise<{ user: User; accessToken: string }> {
     const { email, password } = loginAuthDto;
 
     const user = await this.usersRepository.findOne({ where: { email } });
@@ -58,7 +58,7 @@ export class AuthService {
     };
     const accessToken = this.jwtService.sign(payload);
 
-    return { accessToken };
+    return { user, accessToken };
   }
 
   async getProfile(userId: number): Promise<User> {

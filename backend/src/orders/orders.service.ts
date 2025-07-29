@@ -40,6 +40,13 @@ export class OrdersService {
     return await this.dataSource.query('SELECT * FROM orders');
   }
 
+  async findAllByUserId(userId: number): Promise<Order[]> {
+    return await this.dataSource.query(
+      'SELECT * FROM orders WHERE user_id = ?',
+      [userId],
+    );
+  }
+
   async findOne(id: number): Promise<Order> {
     const [order] = await this.dataSource.query(
       'SELECT * FROM orders WHERE order_id = ?',
